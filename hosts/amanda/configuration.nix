@@ -2,7 +2,7 @@
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 
-{ config, lib, pkgs, ... }:
+{ config, pkgs, ... }:
 
 {
   imports = [
@@ -20,6 +20,8 @@
   my.mobile.enable = true;
   my.nextcloud.enable = true;
   my.noise-reduce.enable = true;
+  my.wayland.enable = true;
+  my.x.enable = true;
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -41,22 +43,14 @@
     randomizedDelaySec = "45min";
   };
 
+  # enable userspace oom killer
+  systemd.oomd = {
+    enable = true;
+    enableUserSlices = true;
+  };
+
   # enable real-time kit for audio
   security.rtkit.enable = true;
-
-  # Enable the X11 windowing system.
-  services.xserver.enable = true;
-
-  # We must have one window manager available at least, let's keep it minimal.
-  #
-  # This helps us debug our home-manager instance to make sure awesome is independent from system.
-  services.xserver.windowManager.openbox.enable = true;
-  #services.xserver.windowManager.awesome = {
-  #  enable = true;
-  #  luaModules = with pkgs.luaPackages; [
-  #    luarocks
-  #  ];
-  #};
 
   # Configure keymap in X11
   services.xserver.xkb.layout = "us";

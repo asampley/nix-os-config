@@ -16,6 +16,8 @@
     ./mobile.nix
     ./nextcloud.nix
     ./noise-reduce.nix
+    ./x.nix
+    ./wayland.nix
   ];
 
   # This option defines the first version of NixOS you have installed on this particular machine,
