@@ -10,7 +10,7 @@
     enable = lib.mkEnableOption "wayland window manager and settings";
   };
 
-  config = let cfg = config.my.x; in lib.mkIf cfg.enable {
+  config = let cfg = config.my.wayland; in lib.mkIf cfg.enable {
     # Make sure we use a wayland supported display manager
     services.xserver.displayManager.gdm.enable = true;
 

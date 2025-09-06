@@ -57,6 +57,7 @@
   nixpkgs.config.allowUnfreePredicate =
     pkg:
     builtins.elem (lib.getName pkg) [
+      "hplip"
       "steam"
       "steam-original"
       "steam-unwrapped"
@@ -69,6 +70,7 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
+    alsa-utils
     vim
     wget
   ];

@@ -10,7 +10,7 @@
         "amanda" = {
           system = "x86_64-linux";
         };
-        "meili" = {
+        "miranda" = {
           system = "x86_64-linux";
         };
       };
