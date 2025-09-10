@@ -87,6 +87,16 @@
     userServices = true;
   };
 
+  services.earlyoom = {
+    enable = true;
+    enableNotifications = true;
+    freeMemThreshold = 10;
+    freeSwapThreshold = 10;
+    extraArgs = [
+      "--prefer" "(firefox|chromium)"
+    ];
+  };
+
   my.nextcloud.hostName = "cloud.asampley.ca";
   my.nextcloud.https = true;
 
