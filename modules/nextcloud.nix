@@ -44,7 +44,7 @@
       forceSSL = cfg.https;
     };
 
-    networking.firewall.allowedTCPPorts = lib.optionals cfg.https [ 443 ];
+    networking.firewall.allowedTCPPorts = lib.optionals cfg.https [ 443 80 ];
 
     services.postgresql = {
       enable = true;
