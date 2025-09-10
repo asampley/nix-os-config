@@ -20,6 +20,7 @@
   my.mobile.enable = true;
   my.nextcloud.enable = true;
   my.noise-reduce.enable = true;
+  my.oom.enable = true;
   my.wayland.enable = true;
   my.x.enable = true;
 
@@ -85,16 +86,6 @@
     enable = true;
     addresses = true;
     userServices = true;
-  };
-
-  services.earlyoom = {
-    enable = true;
-    enableNotifications = true;
-    freeMemThreshold = 10;
-    freeSwapThreshold = 10;
-    extraArgs = [
-      "--prefer" "(firefox|chromium)"
-    ];
   };
 
   my.nextcloud.hostName = "cloud.asampley.ca";

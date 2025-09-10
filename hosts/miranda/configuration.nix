@@ -21,6 +21,7 @@
   my.mobile.enable = true;
   #my.nextcloud.enable = true;
   #my.noise-reduce.enable = true;
+  my.oom.enable = true;
   my.wayland.enable = true;
   my.x.enable = false;
 

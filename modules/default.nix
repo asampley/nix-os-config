@@ -16,6 +16,7 @@
     ./mobile.nix
     ./nextcloud.nix
     ./noise-reduce.nix
+    ./oom.nix
     ./x.nix
     ./wayland.nix
   ];
