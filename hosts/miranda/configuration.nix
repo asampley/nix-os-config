@@ -13,14 +13,15 @@
 
   # Custom modules
   #my.auto-certs.enable = true;
+  my.bluetooth.enable = true;
   my.development.enable = true;
   my.dynamic.enable = true;
   #my.emulation.enable = true;
-  #my.gaming.enable = true;
+  my.gaming.enable = true;
   #my.http-file-share.enable = true;
   my.mobile.enable = true;
   #my.nextcloud.enable = true;
-  #my.noise-reduce.enable = true;
+  my.noise-reduce.enable = true;
   my.oom.enable = true;
   my.wayland.enable = true;
   my.x.enable = false;
@@ -67,9 +68,22 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
+    pwvucontrol
     vim
     wget
   ];
+
+  swapDevices = [
+    {
+      device = "/swapfile";
+      size = 16384;
+    }
+  ];
+
+  # hibernation
+  boot.kernelParams = ["resume_offset=168685568" "mem_sleep_default=deep"]; # a better way to do this then check and hardcode?
+  boot.resumeDevice = config.fileSystems."/".device;
+  #powerManagement.enable = true;
 
   # This option defines the first version of NixOS you have installed on this particular machine,
   # and is used to maintain compatibility with application data (e.g. databases) created on older NixOS versions.

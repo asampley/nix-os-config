@@ -8,6 +8,7 @@
 {
   imports = [
     ./auto-certs.nix
+    ./bluetooth.nix
     ./development.nix
     ./dynamic.nix
     ./emulation.nix
@@ -92,5 +93,9 @@
   services.nginx.virtualHosts."_" = {
     default = true;
     extraConfig = "return 404;";
+  };
+
+  services.libinput.touchpad = {
+    clickMethod = "clickfinger";
   };
 }
