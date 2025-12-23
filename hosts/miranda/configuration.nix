@@ -19,6 +19,7 @@
   #my.emulation.enable = true;
   my.gaming.enable = true;
   #my.http-file-share.enable = true;
+  my.maintenance.enable = true;
   my.mobile.enable = true;
   #my.nextcloud.enable = true;
   my.noise-reduce.enable = true;

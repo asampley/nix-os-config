@@ -14,6 +14,7 @@
     ./emulation.nix
     ./gaming.nix
     ./http-file-share.nix
+    ./maintenance.nix
     ./mobile.nix
     ./nextcloud.nix
     ./noise-reduce.nix
@@ -21,17 +22,6 @@
     ./x.nix
     ./wayland.nix
   ];
-
-  system.autoUpgrade = {
-    persistent = lib.mkDefault true;
-    flake = lib.mkDefault "/etc/nixos";
-    flags = [
-      "-L"
-    ] ++ lib.optionals (config.system.autoUpgrade.flake != null) [
-      "--update-input"
-      "nixpkgs"
-    ];
-  };
 
   time.timeZone = lib.mkDefault "Canada/Mountain";
 

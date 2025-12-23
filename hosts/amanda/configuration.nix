@@ -17,6 +17,7 @@
   #my.emulation.enable = true;
   my.gaming.enable = true;
   my.http-file-share.enable = true;
+  my.maintenance.enable = true;
   my.mobile.enable = true;
   my.nextcloud.enable = true;
   my.noise-reduce.enable = true;
@@ -29,20 +30,6 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   networking.hostName = "amanda"; # Define your hostname.
-
-  nix.gc = {
-    automatic = true;
-    dates = "weekly";
-    options = "--delete-older-than 30d";
-    persistent = true;
-    randomizedDelaySec = "45min";
-  };
-
-  system.autoUpgrade = {
-    enable = true;
-    dates = "weekly";
-    randomizedDelaySec = "45min";
-  };
 
   # enable userspace oom killer
   systemd.oomd = {
