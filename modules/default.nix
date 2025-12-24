@@ -7,6 +7,7 @@
 
 {
   imports = [
+    ./audio.nix
     ./auto-certs.nix
     ./bluetooth.nix
     ./development.nix
@@ -39,11 +40,13 @@
   # Don't forget to set a password with ‘passwd’.
   users.users.asampley = {
     isNormalUser = true;
-    extraGroups = [ "wheel" ]
-      ++ lib.optional config.services.nginx.enable "nginx"
-      ++ lib.optional config.virtualisation.docker.enable "docker"
-      ++ lib.optional config.programs.adb.enable "adbusers"
-    ;
+    extraGroups = [
+      "wheel"
+      "plugdev"
+    ]
+    ++ lib.optional config.services.nginx.enable "nginx"
+    ++ lib.optional config.virtualisation.docker.enable "docker"
+    ++ lib.optional config.programs.adb.enable "adbusers";
   };
 
   nixpkgs.config.allowUnfreePredicate =
@@ -62,7 +65,7 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-    alsa-utils
+    nix-alien
     vim
     wget
   ];

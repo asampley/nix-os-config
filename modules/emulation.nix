@@ -11,8 +11,8 @@
   };
 
   config = lib.mkIf config.my.emulation.enable {
-    boot.binfmt.emulatedSystems = builtins.filter
-      (system: system != pkgs.hostPlatform)
-      [ "aarch64-linux" ];
+    boot.binfmt.emulatedSystems = builtins.filter (system: system != pkgs.hostPlatform) [
+      "aarch64-linux"
+    ];
   };
 }

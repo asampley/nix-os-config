@@ -2,16 +2,22 @@
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 {
-  imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-      ../../modules 
-    ];
+  imports = [
+    # Include the results of the hardware scan.
+    ./hardware-configuration.nix
+    ../../modules
+  ];
 
   # Custom modules
+  my.audio.enable = true;
   #my.auto-certs.enable = true;
   my.bluetooth.enable = true;
   my.development.enable = true;
@@ -50,29 +56,10 @@
     ];
   };
 
-  # Enable sound.
-  # hardware.pulseaudio.enable = true;
-  # OR
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    pulse.enable = true;
-  };
-
   # Enable touchpad support (enabled default in most desktopManager).
   services.libinput.enable = true;
 
-  programs.slock.enable = true;
   programs.firefox.enable = true;
-
-  # List packages installed in system profile. To search, run:
-  # $ nix search wget
-  environment.systemPackages = with pkgs; [
-    pwvucontrol
-    vim
-    wget
-  ];
 
   swapDevices = [
     {
@@ -82,7 +69,10 @@
   ];
 
   # hibernation
-  boot.kernelParams = ["resume_offset=168685568" "mem_sleep_default=deep"]; # a better way to do this then check and hardcode?
+  boot.kernelParams = [
+    "resume_offset=168685568"
+    "mem_sleep_default=deep"
+  ]; # a better way to do this then check and hardcode?
   boot.resumeDevice = config.fileSystems."/".device;
   #powerManagement.enable = true;
 

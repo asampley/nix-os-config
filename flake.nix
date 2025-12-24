@@ -1,6 +1,8 @@
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+
+    nix-alien.url = "github:thiagokokada/nix-alien";
   };
 
   outputs =
@@ -23,6 +25,11 @@
             inherit inputs;
           };
           modules = [
+            {
+              nixpkgs.overlays = [
+                inputs.nix-alien.overlays.default
+              ];
+            }
             ./hosts/${name}/configuration.nix
           ];
         }
