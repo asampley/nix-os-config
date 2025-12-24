@@ -24,8 +24,7 @@
       flags = [
         "-L"
       ] ++ lib.optionals (config.system.autoUpgrade.flake != null) [
-        "--update-input"
-        "nixpkgs"
+        "--recreate-lock-file"
       ];
     };
 
