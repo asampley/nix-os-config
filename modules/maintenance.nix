@@ -23,7 +23,8 @@
       flake = lib.mkDefault "/etc/nixos";
       flags = [
         "-L"
-      ] ++ lib.optionals (config.system.autoUpgrade.flake != null) [
+      ]
+      ++ lib.optionals (config.system.autoUpgrade.flake != null) [
         "--recreate-lock-file"
       ];
     };

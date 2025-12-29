@@ -1,5 +1,6 @@
 {
   config,
+  inputs,
   lib,
   pkgs,
   ...
@@ -20,6 +21,7 @@
     ./nextcloud.nix
     ./noise-reduce.nix
     ./oom.nix
+    ./utf-nate.nix
     ./x.nix
     ./wayland.nix
   ];
@@ -47,6 +49,9 @@
     ++ lib.optional config.services.nginx.enable "nginx"
     ++ lib.optional config.virtualisation.docker.enable "docker"
     ++ lib.optional config.programs.adb.enable "adbusers";
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGDHPkbNhmExKEsUQ9gn+IzYzRhnG49Q+rwZ/S+mascf asampley@amanda"
+    ];
   };
 
   nixpkgs.config.allowUnfreePredicate =
@@ -65,7 +70,7 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-    nix-alien
+    inputs.nix-alien.packages.${pkgs.stdenv.hostPlatform.system}.nix-alien
     vim
     wget
   ];
@@ -81,6 +86,21 @@
   programs.fuse.userAllowOther = true;
 
   my.auto-certs.defaults.email = "alex.sampley@gmail.com";
+
+  services.rsnapshot = {
+    extraConfig = ''
+      retain hourly 24
+      retain daily 365
+      retain monthly 12
+      retain yearly 10
+    '';
+    cronIntervals = {
+      hourly = "0 * * * *";
+      daily = "1 0 * * *";
+      monthly = "2 0 1 * *";
+      yearly = "3 0 1 1 *";
+    };
+  };
 
   # Default virtual host to block unknown server names.
   services.nginx.virtualHosts."_" = {

@@ -2,6 +2,10 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
+    utf-nate = {
+      url = "github:asampley/UTF-Nate";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nix-alien.url = "github:thiagokokada/nix-alien";
   };
 
@@ -15,7 +19,11 @@
         "miranda" = {
           system = "x86_64-linux";
         };
+        "willheim" = {
+          system = "x86_64-linux";
+        };
       };
+      # Leave out nix-alien to keep its own nixpkgs
       mkSystems = builtins.mapAttrs (
         name: value:
         nixpkgs.lib.nixosSystem {
@@ -25,12 +33,14 @@
             inherit inputs;
           };
           modules = [
+            ./hosts/${name}/configuration.nix
             {
               nixpkgs.overlays = [
-                inputs.nix-alien.overlays.default
+                (final: prev: {
+                  utf-nate = inputs.utf-nate.packages.${prev.stdenv.hostPlatform.system}.default;
+                })
               ];
             }
-            ./hosts/${name}/configuration.nix
           ];
         }
       );
