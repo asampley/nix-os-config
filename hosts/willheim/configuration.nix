@@ -5,6 +5,7 @@
 {
   config,
   inputs,
+  lib,
   pkgs,
   ...
 }:
@@ -39,6 +40,12 @@
     addresses = true;
     userServices = true;
   };
+
+  networking.firewall.allowedUDPPorts = []
+    ++ lib.optionals config.services.opentracker.enable [ 6969 ];
+
+  networking.firewall.allowedTCPPorts = []
+    ++ lib.optionals config.services.opentracker.enable [ 6969 ];
 
   services.openssh = {
     enable = true;
