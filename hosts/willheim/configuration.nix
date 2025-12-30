@@ -94,19 +94,22 @@
       cfgnc = config.services.nextcloud;
     in
     {
-      paths = [ cfgnc.datadir "${cfgnc.home}/config/config.php" ];
-      repo = "fm2515@fm2515.rsync.net:backup/nextcloud";
+      paths = [ cfgnc.datadir "/tmp/output" ];
+      repo = "ssh://fm2515@fm2515.rsync.net/./backup/nextcloud";
 
       readWritePaths = [ "${cfgnc.datadir}" ];
 
       privateTmp = true;
 
       preHook = ''
+        # Make directory for additional outputs
+        ${pkgs.coreutils}/bin/mkdir -m 777 /tmp/output/
+
         # Lock nextcloud files for consistency
         ${cfgnc.occ}/bin/nextcloud-occ maintenance:mode --on
 
         # Backup database while locked
-        ${config.security.sudo.package}/bin/sudo -u nextcloud ${config.services.postgresql.package}/bin/pg_dump -U ${cfgnc.config.dbuser} ${cfgnc.config.dbname} -f /tmp/pg_dump.sql
+        ${config.security.sudo.package}/bin/sudo -u nextcloud ${config.services.postgresql.package}/bin/pg_dump -U ${cfgnc.config.dbuser} ${cfgnc.config.dbname} -f /tmp/output/pg_dump.sql
       '';
 
       postHook = ''
