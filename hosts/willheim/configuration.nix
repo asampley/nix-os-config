@@ -19,12 +19,12 @@
   # Custom modules
   my.auto-certs.enable = true;
   my.maintenance.enable = true;
+  my.nextcloud = {
+    enable = true;
+    hostName = "cloud.asampley.ca";
+    https = true;
+  };
   my.utf-nate.enable = true;
-  #my.nextcloud = {
-  #  enable = true;
-  #  hostName = "cloud.asampley.ca";
-  #  https = true;
-  #};
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -89,44 +89,44 @@
     "utf-nate@2.service"
   ];
 
-  #services.borgbackup.jobs.nextcloud =
-  #  let
-  #    cfgnc = config.services.nextcloud;
-  #  in
-  #  {
-  #    paths = [ cfgnc.datadir ];
-  #    repo = "fm2515@fm2515.rsync.net:backup/nextcloud";
+  services.borgbackup.jobs.nextcloud =
+    let
+      cfgnc = config.services.nextcloud;
+    in
+    {
+      paths = [ cfgnc.datadir "${cfgnc.home}/config/config.php" ];
+      repo = "fm2515@fm2515.rsync.net:backup/nextcloud";
 
-  #    readWritePaths = [ "${cfgnc.datadir}" ];
+      readWritePaths = [ "${cfgnc.datadir}" ];
 
-  #    privateTmp = true;
+      privateTmp = true;
 
-  #    preHook = ''
-  #      # Lock nextcloud files for consistency
-  #      ${cfgnc.occ}/bin/nextcloud-occ maintenance:mode --on
+      preHook = ''
+        # Lock nextcloud files for consistency
+        ${cfgnc.occ}/bin/nextcloud-occ maintenance:mode --on
 
-  #      # Backup database while locked
-  #      ${config.security.sudo.package}/bin/sudo -u nextcloud ${config.services.postgresql.package}/bin/pg_dump -U ${cfgnc.config.dbuser} ${cfgnc.config.dbname} -f /tmp/pg_dump.sql
-  #    '';
+        # Backup database while locked
+        ${config.security.sudo.package}/bin/sudo -u nextcloud ${config.services.postgresql.package}/bin/pg_dump -U ${cfgnc.config.dbuser} ${cfgnc.config.dbname} -f /tmp/pg_dump.sql
+      '';
 
-  #    postHook = ''
-  #      # Unlock nextcloud files
-  #      ${cfgnc.occ}/bin/nextcloud-occ maintenance:mode --off
-  #    '';
+      postHook = ''
+        # Unlock nextcloud files
+        ${cfgnc.occ}/bin/nextcloud-occ maintenance:mode --off
+      '';
 
-  #    environment = {
-  #      BORG_RSH = "ssh -i /root/.ssh/id_ed25519 ";
-  #      BORG_REMOTE_PATH = "/usr/local/bin/borg1/borg1";
-  #    };
+      environment = {
+        BORG_RSH = "ssh -i /etc/ssh/ssh_host_ed25519_key";
+        BORG_REMOTE_PATH = "/usr/local/bin/borg1/borg1";
+      };
 
-  #    startAt = "*-*-* *:00:00";
-  #    persistentTimer = true;
+      startAt = "*-*-* *:00:00";
+      persistentTimer = true;
 
-  #    encryption = {
-  #      mode = "repokey";
-  #      passCommand = "cat /root/borg.pass";
-  #    };
-  #  };
+      encryption = {
+        mode = "repokey";
+        passCommand = "cat /root/borg.pass";
+      };
+    };
 
   # This option defines the first version of NixOS you have installed on this particular machine,
   # and is used to maintain compatibility with application data (e.g. databases) created on older NixOS versions.

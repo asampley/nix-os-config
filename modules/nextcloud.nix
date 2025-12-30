@@ -50,6 +50,7 @@
       };
 
       services.nginx.virtualHosts."${cfg.hostName}" = {
+        enableACME = cfg.https;
         forceSSL = cfg.https;
       };
 
@@ -68,11 +69,6 @@
             ensureDBOwnership = true;
           }
         ];
-
-        initialScript = pkgs.writeText "init-nextcloud-script" ''
-          GRANT ALL PRIVILEGES ON DATABASE nextcloud TO nextcloud;
-          GRANT ALL PRIVILEGES ON SCHEMA public TO nextcloud;
-        '';
       };
 
       systemd.services."nextcloud-setup" = {

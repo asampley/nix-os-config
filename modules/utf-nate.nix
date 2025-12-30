@@ -32,10 +32,6 @@
             ensureDBOwnership = true;
           }
         ];
-
-        initialScript = pkgs.writeText "init-utf-nate-script" ''
-          GRANT ALL PRIVILEGES ON DATABASE utf-nate TO utf-nate;
-        '';
       };
 
       systemd.services."utf-nate@" = {

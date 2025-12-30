@@ -112,4 +112,10 @@
   services.libinput.touchpad = {
     clickMethod = "clickfinger";
   };
+
+  programs.ssh.knownHosts = {
+    "fm2515.rsync.net" = {
+      publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINdUkGe6kKn5ssz4WRZKjcws0InbQqZayenzk9obmP1z";
+    };
+  };
 }
