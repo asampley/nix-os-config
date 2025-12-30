@@ -15,16 +15,13 @@
   my.auto-certs.enable = true;
   my.development.enable = true;
   my.dynamic.enable = true;
-  #my.emulation.enable = true;
   my.gaming.enable = true;
   my.http-file-share.enable = true;
   my.maintenance.enable = true;
   my.mobile.enable = true;
-  my.nextcloud.enable = true;
   my.noise-reduce.enable = true;
   my.oom.enable = true;
   my.wayland.enable = true;
-  #my.x.enable = true;
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -62,52 +59,6 @@
     addresses = true;
     userServices = true;
   };
-
-  my.nextcloud.hostName = "cloud.asampley.ca";
-  my.nextcloud.https = true;
-
-  services.nginx.virtualHosts."${config.services.nextcloud.hostName}" = {
-    enableACME = true;
-  };
-
-  services.borgbackup.jobs.nextcloud =
-    let
-      cfgnc = config.services.nextcloud;
-    in
-    {
-      paths = [ cfgnc.datadir ];
-      repo = "fm2515@fm2515.rsync.net:backup/nextcloud";
-
-      readWritePaths = [ "${cfgnc.datadir}" ];
-
-      privateTmp = true;
-
-      preHook = ''
-        # Lock nextcloud files for consistency
-        ${cfgnc.occ}/bin/nextcloud-occ maintenance:mode --on
-
-        # Backup database while locked
-        ${config.security.sudo.package}/bin/sudo -u nextcloud ${config.services.postgresql.package}/bin/pg_dump -U ${cfgnc.config.dbuser} ${cfgnc.config.dbname} -f /tmp/pg_dump.sql
-      '';
-
-      postHook = ''
-        # Unlock nextcloud files
-        ${cfgnc.occ}/bin/nextcloud-occ maintenance:mode --off
-      '';
-
-      environment = {
-        BORG_RSH = "ssh -i /root/.ssh/id_ed25519 ";
-        BORG_REMOTE_PATH = "/usr/local/bin/borg1/borg1";
-      };
-
-      startAt = "*-*-* *:00:00";
-      persistentTimer = true;
-
-      encryption = {
-        mode = "repokey";
-        passCommand = "cat /root/borg.pass";
-      };
-    };
 
   # This option defines the first version of NixOS you have installed on this particular machine,
   # and is used to maintain compatibility with application data (e.g. databases) created on older NixOS versions.
