@@ -70,6 +70,7 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
+    git
     inputs.nix-alien.packages.${pkgs.stdenv.hostPlatform.system}.nix-alien
     vim
     wget

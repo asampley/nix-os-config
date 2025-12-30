@@ -117,11 +117,11 @@
         "systems": "systems"
       },
       "locked": {
-        "lastModified": 1767025329,
-        "narHash": "sha256-p8+PMh3iiOpDMkEoX1pE7KT752Kp2Yukf0x1ls651q8=",
+        "lastModified": 1767062463,
+        "narHash": "sha256-6Uv6wyxJxqefbnxY7qRtKfDZzhpObhemFCXiLvlKASs=",
         "owner": "asampley",
         "repo": "UTF-Nate",
-        "rev": "eec8c837fb649e57dbd2863372f314f1da29599b",
+        "rev": "18fc05b2c980897e7b8cd81cc5d789696c69e524",
         "type": "github"
       },
       "original": {
