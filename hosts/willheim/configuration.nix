@@ -41,12 +41,6 @@
     userServices = true;
   };
 
-  networking.firewall.allowedUDPPorts = []
-    ++ lib.optionals config.services.opentracker.enable [ 6969 ];
-
-  networking.firewall.allowedTCPPorts = []
-    ++ lib.optionals config.services.opentracker.enable [ 6969 ];
-
   services.openssh = {
     enable = true;
     settings = {
@@ -58,13 +52,13 @@
   services.opentracker.enable = true;
   services.nginx.virtualHosts."tracker.asampley.ca" = {
     locations."/" = {
-      proxyPass = "http://127.0.0.1:6969";
+      proxyPass = "http://localhost:6969/announce";
     };
   };
 
   services.rsnapshot.extraConfig = ''
     # Valheim server
-    #backup /home/steam/.config/unity3d/IronGate/Valheim/worlds_local/	localhost/	exclud=*_backup_*,exclude=*.old
+    #backup /home/steam/.config/unity3d/IronGate/Valheim/worlds_local/	localhost/	exclude=*_backup_*,exclude=*.old
   '';
 
   environment.etc."utf-nate/1/config.toml".text = ''
