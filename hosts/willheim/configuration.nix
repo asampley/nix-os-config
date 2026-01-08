@@ -49,10 +49,21 @@
     };
   };
 
-  services.opentracker.enable = true;
+  services.opentracker = {
+    enable = true;
+    package = pkgs.opentracker.overrideAttrs (final: prev: {
+      makeFlags = prev.makeFlags ++ [ "FEATURES=-DWANT_IP_FROM_PROXY" ];
+    });
+    extraOptions = "-f ${pkgs.writeText "opentracker-config" ''
+      access.proxy 127.0.0.1
+    ''}";
+  };
   services.nginx.virtualHosts."tracker.asampley.ca" = {
+    onlySSL = true;
+    enableACME = true;
     locations."/" = {
       proxyPass = "http://localhost:6969/announce";
+      recommendedProxySettings = true;
     };
   };
 
