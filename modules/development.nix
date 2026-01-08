@@ -19,8 +19,6 @@
     # Enable container options such as registries
     virtualisation.containers.enable = true;
 
-    programs.adb.enable = true;
-
     users.groups.plugdev = { };
 
     services.udev.packages = [
