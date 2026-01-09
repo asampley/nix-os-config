@@ -13,6 +13,7 @@
   # Custom modules
   my.audio.enable = true;
   my.auto-certs.enable = true;
+  my.bluetooth.enable = true;
   my.development.enable = true;
   my.dynamic.enable = true;
   my.gaming.enable = true;
