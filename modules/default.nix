@@ -118,4 +118,6 @@
       publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINdUkGe6kKn5ssz4WRZKjcws0InbQqZayenzk9obmP1z";
     };
   };
+
+  hardware.steam-hardware.enable = true;
 }
