@@ -47,6 +47,21 @@
           dbuser = "nextcloud";
           dbhost = "/run/postgresql";
         };
+
+        settings = {
+          log_type = "systemd";
+	};
+      };
+
+      systemd.services.nextcloud-custom-config = {
+        path = [
+          config.services.nextcloud.occ
+        ];
+        script = ''
+          nextcloud-occ theming:config url "https://${cfg.hostName}";
+        '';
+        after = [ "nextcloud-setup.service" ];
+        wantedBy = [ "multi-user.target" ];
       };
 
       services.nginx.virtualHosts."${cfg.hostName}" = {
