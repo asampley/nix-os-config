@@ -20,7 +20,7 @@
         group = "utf-nate";
       };
 
-      users.groups.utf-nate = {};
+      users.groups.utf-nate = { };
 
       services.postgresql = {
         enable = true;

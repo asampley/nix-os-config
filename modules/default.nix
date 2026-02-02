@@ -21,6 +21,7 @@
     ./nextcloud.nix
     ./noise-reduce.nix
     ./oom.nix
+    ./power-saving.nix
     ./utf-nate.nix
     ./x.nix
     ./wayland.nix

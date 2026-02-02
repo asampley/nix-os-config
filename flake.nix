@@ -48,7 +48,7 @@
     {
       nixosConfigurations = mkSystems hostInfo;
       formatter = nixpkgs.lib.genAttrs [ "x86_64-linux" ] (
-        system: nixpkgs.legacyPackages.${system}.nixfmt-rfc-style
+        system: nixpkgs.legacyPackages.${system}.nixfmt
       );
     };
 }

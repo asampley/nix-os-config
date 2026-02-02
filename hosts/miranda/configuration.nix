@@ -18,7 +18,6 @@
 
   # Custom modules
   my.audio.enable = true;
-  #my.auto-certs.enable = true;
   my.bluetooth.enable = true;
   my.development.enable = true;
   my.dynamic.enable = true;
@@ -27,9 +26,9 @@
   #my.http-file-share.enable = true;
   my.maintenance.enable = true;
   my.mobile.enable = true;
-  #my.nextcloud.enable = true;
   my.noise-reduce.enable = true;
   my.oom.enable = true;
+  my.power-saving.enable = true;
   my.wayland.enable = true;
   my.x.enable = false;
 
@@ -64,7 +63,7 @@
   swapDevices = [
     {
       device = "/swapfile";
-      size = 16384;
+      size = 16 * 1024;
     }
   ];
 
@@ -72,15 +71,19 @@
   boot.kernelParams = [
     "resume_offset=168685568"
     "mem_sleep_default=deep"
-  ]; # a better way to do this then check and hardcode?
+  ]; # a better way to do this than check and hardcode?
   boot.resumeDevice = config.fileSystems."/".device;
-  #powerManagement.enable = true;
+  powerManagement.enable = true;
+  systemd.sleep.extraConfig = ''
+    HibernateDelaySec=15m
+    SuspendState=mem
+  '';
 
   # power keys
   services.logind.settings.Login = {
-    HandlePowerKey = "suspend";
+    HandlePowerKey = "suspend-then-hibernate";
     HandlePowerKeyLongPress = "poweroff";
-    HandleLidSwitch = "suspend";
+    HandleLidSwitch = "suspend-then-hibernate";
     HandleLidSwitchDocked = "ignore";
   };
 

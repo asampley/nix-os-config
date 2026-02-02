@@ -51,9 +51,11 @@
 
   services.opentracker = {
     enable = true;
-    package = pkgs.opentracker.overrideAttrs (final: prev: {
-      makeFlags = prev.makeFlags ++ [ "FEATURES=-DWANT_IP_FROM_PROXY" ];
-    });
+    package = pkgs.opentracker.overrideAttrs (
+      final: prev: {
+        makeFlags = prev.makeFlags ++ [ "FEATURES=-DWANT_IP_FROM_PROXY" ];
+      }
+    );
     extraOptions = "-f ${pkgs.writeText "opentracker-config" ''
       access.proxy 127.0.0.1
     ''}";
@@ -99,7 +101,10 @@
       cfgnc = config.services.nextcloud;
     in
     {
-      paths = [ cfgnc.datadir "/tmp/output" ];
+      paths = [
+        cfgnc.datadir
+        "/tmp/output"
+      ];
       repo = "ssh://fm2515@fm2515.rsync.net/./backup/nextcloud";
 
       readWritePaths = [ "${cfgnc.datadir}" ];

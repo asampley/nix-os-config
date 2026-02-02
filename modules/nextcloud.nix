@@ -50,7 +50,7 @@
 
         settings = {
           log_type = "systemd";
-	};
+        };
       };
 
       systemd.services.nextcloud-custom-config = {
