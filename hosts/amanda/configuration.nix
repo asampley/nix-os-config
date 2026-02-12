@@ -24,6 +24,9 @@
   my.oom.enable = true;
   my.wayland.enable = true;
 
+  # Open http ports for file share
+  networking.firewall.allowedTCPPorts = [ 80 ];
+
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;

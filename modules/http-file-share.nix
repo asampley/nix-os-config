@@ -30,7 +30,11 @@
             "127.0.0.1"
           ];
 
-          locations."/fileshare" = {
+          locations."= /fileshare" = {
+            return = "301 $scheme://$host$request_uri/";
+          };
+
+          locations."^~ /fileshare/" = {
             root = "/var/www/";
 
             tryFiles = "$uri $uri/ =404";
