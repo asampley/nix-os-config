@@ -22,6 +22,7 @@
     ./noise-reduce.nix
     ./oom.nix
     ./power-saving.nix
+    ./opentracker.nix
     ./utf-nate.nix
     ./x.nix
     ./wayland.nix

@@ -23,6 +23,11 @@
     enable = true;
     hostName = "cloud.asampley.ca";
     https = true;
+    borgbackup.enable = true;
+  };
+  my.opentracker = {
+    enable = true;
+    supportReverseProxy = true;
   };
   my.utf-nate.enable = true;
 
@@ -49,17 +54,6 @@
     };
   };
 
-  services.opentracker = {
-    enable = true;
-    package = pkgs.opentracker.overrideAttrs (
-      final: prev: {
-        makeFlags = prev.makeFlags ++ [ "FEATURES=-DWANT_IP_FROM_PROXY" ];
-      }
-    );
-    extraOptions = "-f ${pkgs.writeText "opentracker-config" ''
-      access.proxy 127.0.0.1
-    ''}";
-  };
   services.nginx.virtualHosts."tracker.asampley.ca" = {
     onlySSL = true;
     enableACME = true;
@@ -96,50 +90,19 @@
     "utf-nate@2.service"
   ];
 
-  services.borgbackup.jobs.nextcloud =
-    let
-      cfgnc = config.services.nextcloud;
-    in
-    {
-      paths = [
-        cfgnc.datadir
-        "/tmp/output"
-      ];
-      repo = "ssh://fm2515@fm2515.rsync.net/./backup/nextcloud";
+  services.borgbackup.jobs."${config.my.nextcloud.borgbackup.name}" = {
+    repo = "ssh://fm2515@fm2515.rsync.net/./backup/nextcloud";
 
-      readWritePaths = [ "${cfgnc.datadir}" ];
-
-      privateTmp = true;
-
-      preHook = ''
-        # Make directory for additional outputs
-        ${pkgs.coreutils}/bin/mkdir -m 777 /tmp/output/
-
-        # Lock nextcloud files for consistency
-        ${cfgnc.occ}/bin/nextcloud-occ maintenance:mode --on
-
-        # Backup database while locked
-        ${config.security.sudo.package}/bin/sudo -u nextcloud ${config.services.postgresql.package}/bin/pg_dump -U ${cfgnc.config.dbuser} ${cfgnc.config.dbname} -f /tmp/output/pg_dump.sql
-      '';
-
-      postHook = ''
-        # Unlock nextcloud files
-        ${cfgnc.occ}/bin/nextcloud-occ maintenance:mode --off
-      '';
-
-      environment = {
-        BORG_RSH = "ssh -i /etc/ssh/ssh_host_ed25519_key";
-        BORG_REMOTE_PATH = "/usr/local/bin/borg1/borg1";
-      };
-
-      startAt = "*-*-* *:00:00";
-      persistentTimer = true;
-
-      encryption = {
-        mode = "repokey";
-        passCommand = "cat /root/borg.pass";
-      };
+    environment = {
+      BORG_RSH = "ssh -i /etc/ssh/ssh_host_ed25519_key";
+      BORG_REMOTE_PATH = "/usr/local/bin/borg1/borg1";
     };
+
+    encryption = {
+      mode = "repokey";
+      passCommand = "cat /root/borg.pass";
+    };
+  };
 
   # This option defines the first version of NixOS you have installed on this particular machine,
   # and is used to maintain compatibility with application data (e.g. databases) created on older NixOS versions.
