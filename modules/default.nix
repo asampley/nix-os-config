@@ -21,8 +21,9 @@
     ./nextcloud.nix
     ./noise-reduce.nix
     ./oom.nix
-    ./power-saving.nix
     ./opentracker.nix
+    ./power-saving.nix
+    ./prosody.nix
     ./utf-nate.nix
     ./x.nix
     ./wayland.nix
@@ -88,7 +89,10 @@
   # Allow users to specify allow_other or allow_root on fuse mounts
   programs.fuse.userAllowOther = true;
 
-  my.auto-certs.defaults.email = "alex.sampley@gmail.com";
+  security.acme.defaults = {
+    webroot = "/var/lib/acme/acme-challenge";
+    email = "alex.sampley@gmail.com";
+  };
 
   services.rsnapshot = {
     extraConfig = ''

@@ -7,8 +7,6 @@
 {
   options.my.auto-certs = {
     enable = lib.mkEnableOption "auto generate certs using ACME";
-
-    defaults = options.security.acme.defaults;
   };
 
   config =
@@ -18,8 +16,6 @@
     lib.mkIf cfg.enable {
       security.acme = {
         acceptTerms = true;
-
-        defaults = cfg.defaults;
 
         certs =
           let

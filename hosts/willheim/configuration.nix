@@ -29,6 +29,11 @@
     enable = true;
     supportReverseProxy = true;
   };
+  #my.prosody = {
+  #  enable = true;
+  #  publicDomainName = "asampley.ca";
+  #  openFirewall = true;
+  #};
   my.utf-nate.enable = true;
 
   # Use the systemd-boot EFI boot loader.
