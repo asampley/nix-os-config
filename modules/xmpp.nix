@@ -6,26 +6,28 @@
 }:
 
 {
-  options.my.prosody = with lib; {
-    enable = mkEnableOption "prosody XMPP server";
-    domainName = mkOption {
-      type = types.str;
-      default = "xmpp.${config.my.prosody.publicDomainName}";
+  options.my.xmpp = with lib; {
+    prosody = {
+      enable = mkEnableOption "prosody XMPP server";
+      domainName = mkOption {
+        type = types.str;
+        default = "xmpp.${config.my.xmpp.prosody.publicDomainName}";
+      };
+      publicDomainName = mkOption {
+        type = types.str;
+      };
+      openFirewall = mkEnableOption "open firewall for basic client server ports";
     };
-    publicDomainName = mkOption {
-      type = types.str;
-    };
-    openFirewall = mkEnableOption "open firewall for basic client server ports";
   };
 
   config =
     let
-      cfg = config.my.prosody;
-      sslCertDir = config.security.acme.certs."${cfg.publicDomainName}".directory;
+      cfg = config.my.xmpp;
+      sslCertDir = config.security.acme.certs."${cfg.prosody.publicDomainName}".directory;
     in
-    lib.mkIf cfg.enable {
+    lib.mkIf cfg.prosody.enable {
       networking.firewall = {
-        allowedTCPPorts = lib.optionals cfg.openFirewall [
+        allowedTCPPorts = lib.optionals cfg.prosody.openFirewall [
           5222
           5223
         ];
@@ -33,7 +35,7 @@
 
       services.prosody = {
         enable = true;
-        admins = [ "asampley@${cfg.publicDomainName}" ];
+        admins = [ "asampley@${cfg.prosody.publicDomainName}" ];
         allowRegistration = lib.mkDefault false;
         authentication = "internal_plain";
         s2sSecureAuth = lib.mkDefault true;
@@ -44,8 +46,8 @@
           key = "${sslCertDir}/key.pem";
         };
         virtualHosts = {
-          "${cfg.publicDomainName}" = {
-            domain = "${cfg.publicDomainName}";
+          "${cfg.prosody.publicDomainName}" = {
+            domain = "${cfg.prosody.publicDomainName}";
             enabled = true;
           };
         };
@@ -62,34 +64,34 @@
         };
         muc = [
           {
-            domain = "conference.${cfg.domainName}";
+            domain = "conference.${cfg.prosody.domainName}";
             restrictRoomCreation = false;
           }
         ];
         httpFileShare = {
-          domain = "upload.${cfg.domainName}";
+          domain = "upload.${cfg.prosody.domainName}";
         };
         disco_items = [
           {
             description = "http file share";
-            url = "upload.${cfg.domainName}";
+            url = "upload.${cfg.prosody.domainName}";
           }
         ];
         xmppComplianceSuite = lib.mkDefault false;
       };
 
       # certs for xmpp
-      security.acme.certs."${cfg.publicDomainName}" = {
+      security.acme.certs."${cfg.prosody.publicDomainName}" = {
         extraDomainNames = [
-          "${cfg.domainName}"
-          "*.${cfg.domainName}"
+          "${cfg.prosody.domainName}"
+          "*.${cfg.prosody.domainName}"
         ];
         postRun = ''
           ${pkgs.acl}/bin/setfacl -m u:prosody:rx "${
-            config.security.acme.certs.${cfg.publicDomainName}.directory
+            config.security.acme.certs.${cfg.prosody.publicDomainName}.directory
           }"
           ${pkgs.acl}/bin/setfacl -m u:prosody:r "${
-            config.security.acme.certs.${cfg.publicDomainName}.directory
+            config.security.acme.certs.${cfg.prosody.publicDomainName}.directory
           }"/*.pem
         '';
         reloadServices = [ "prosody" ];

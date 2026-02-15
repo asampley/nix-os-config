@@ -10,7 +10,9 @@
   imports = [
     ./audio.nix
     ./auto-certs.nix
+    ./bittorrent.nix
     ./bluetooth.nix
+    ./cloud.nix
     ./development.nix
     ./dynamic.nix
     ./emulation.nix
@@ -18,14 +20,12 @@
     ./http-file-share.nix
     ./maintenance.nix
     ./mobile.nix
-    ./nextcloud.nix
     ./noise-reduce.nix
     ./oom.nix
-    ./opentracker.nix
     ./power-saving.nix
-    ./prosody.nix
     ./utf-nate.nix
     ./x.nix
+    ./xmpp.nix
     ./wayland.nix
   ];
 

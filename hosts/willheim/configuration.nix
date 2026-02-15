@@ -19,17 +19,17 @@
   # Custom modules
   my.auto-certs.enable = true;
   my.maintenance.enable = true;
-  my.nextcloud = {
+  my.cloud.nextcloud = {
     enable = true;
     hostName = "cloud.asampley.ca";
     https = true;
     borgbackup.enable = true;
   };
-  my.opentracker = {
+  my.bittorrent.opentracker = {
     enable = true;
     supportReverseProxy = true;
   };
-  #my.prosody = {
+  #my.xmpp.prosody = {
   #  enable = true;
   #  publicDomainName = "asampley.ca";
   #  openFirewall = true;
@@ -95,7 +95,7 @@
     "utf-nate@2.service"
   ];
 
-  services.borgbackup.jobs."${config.my.nextcloud.borgbackup.name}" = {
+  services.borgbackup.jobs."${config.my.cloud.nextcloud.borgbackup.name}" = {
     repo = "ssh://fm2515@fm2515.rsync.net/./backup/nextcloud";
 
     environment = {

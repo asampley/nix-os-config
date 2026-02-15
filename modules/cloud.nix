@@ -5,42 +5,38 @@
   ...
 }:
 {
-  options.my.nextcloud = with lib; {
-    enable = mkEnableOption "host nextcloud instance";
+  options.my.cloud = with lib; {
+    nextcloud = {
+      enable = mkEnableOption "host nextcloud instance";
 
-    hostName = mkOption {
-      type = types.str;
-      default = "${config.services.avahi.hostName}.${config.services.avahi.domainName}";
-    };
+      hostName = mkOption {
+        type = types.str;
+        default = "${config.services.avahi.hostName}.${config.services.avahi.domainName}";
+      };
 
-    borgbackup = mkOption {
-      type = types.submodule {
-        options = {
-          enable = mkEnableOption "borg backups of nextcloud";
-          name = mkOption {
-            type = types.str;
-            default = "nextcloud";
-          };
+      borgbackup = {
+        enable = mkEnableOption "borg backups of nextcloud";
+        name = mkOption {
+          type = types.str;
+          default = "nextcloud";
         };
       };
-      default = { };
-    };
 
-    https = lib.mkEnableOption "https for nextcloud";
+      https = lib.mkEnableOption "https for nextcloud";
+    };
   };
 
   config =
     let
-      cfg = config.my.nextcloud;
-    in
-    lib.mkIf cfg.enable {
-      services.nextcloud = {
+      cfg = config.my.cloud;
+    in {
+      services.nextcloud = lib.mkIf cfg.nextcloud.enable {
         enable = true;
 
-        https = cfg.https;
+        https = cfg.nextcloud.https;
 
         package = pkgs.nextcloud32;
-        hostName = "${cfg.hostName}";
+        hostName = "${cfg.nextcloud.hostName}";
 
         extraAppsEnable = true;
         extraApps = with config.services.nextcloud.package.packages.apps; {
@@ -71,18 +67,18 @@
           config.services.nextcloud.occ
         ];
         script = ''
-          nextcloud-occ theming:config url "https://${cfg.hostName}";
+          nextcloud-occ theming:config url "https://${cfg.nextcloud.hostName}";
         '';
         after = [ "nextcloud-setup.service" ];
         wantedBy = [ "multi-user.target" ];
       };
 
-      services.nginx.virtualHosts."${cfg.hostName}" = {
-        enableACME = cfg.https;
-        forceSSL = cfg.https;
+      services.nginx.virtualHosts."${cfg.nextcloud.hostName}" = {
+        enableACME = cfg.nextcloud.https;
+        forceSSL = cfg.nextcloud.https;
       };
 
-      networking.firewall.allowedTCPPorts = lib.optionals cfg.https [
+      networking.firewall.allowedTCPPorts = lib.optionals cfg.nextcloud.https [
         443
         80
       ];
@@ -104,8 +100,8 @@
         after = [ "postgresql.service" ];
       };
 
-      services.borgbackup.jobs = lib.mkIf cfg.borgbackup.enable {
-        "${cfg.borgbackup.name}" =
+      services.borgbackup.jobs = lib.mkIf cfg.nextcloud.borgbackup.enable {
+        "${cfg.nextcloud.borgbackup.name}" =
           let
             cfgnc = config.services.nextcloud;
           in
