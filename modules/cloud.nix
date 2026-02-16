@@ -29,7 +29,8 @@
   config =
     let
       cfg = config.my.cloud;
-    in {
+    in
+    {
       services.nextcloud = lib.mkIf cfg.nextcloud.enable {
         enable = true;
 
