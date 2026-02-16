@@ -19,6 +19,10 @@
   # Custom modules
   my.auto-certs.enable = true;
   my.maintenance.enable = true;
+  my.matrix.tuwunel = {
+    enable = true;
+    publicDomainName = "asampley.ca";
+  };
   my.cloud.nextcloud = {
     enable = true;
     hostName = "cloud.asampley.ca";

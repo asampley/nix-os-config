@@ -19,6 +19,7 @@
     ./gaming.nix
     ./http-file-share.nix
     ./maintenance.nix
+    ./matrix.nix
     ./mobile.nix
     ./noise-reduce.nix
     ./oom.nix
