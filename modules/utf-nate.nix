@@ -1,48 +1,52 @@
+{ moduleWithSystem, ... }:
 {
-  config,
-  inputs,
-  lib,
-  pkgs,
-  ...
-}:
-{
-  options.my.utf-nate = {
-    enable = lib.mkEnableOption "utfnate options";
-  };
-
-  config =
-    let
-      cfg = config.my.utf-nate;
-    in
-    lib.mkIf cfg.enable {
-      users.users.utf-nate = {
-        isSystemUser = true;
-        group = "utf-nate";
+  flake.nixosModules.utf-nate = moduleWithSystem (
+    { inputs', ... }:
+    {
+      config,
+      lib,
+      ...
+    }:
+    {
+      options.my.utf-nate = {
+        enable = lib.mkEnableOption "utfnate options";
       };
 
-      users.groups.utf-nate = { };
+      config =
+        let
+          cfg = config.my.utf-nate;
+        in
+        lib.mkIf cfg.enable {
+          users.users.utf-nate = {
+            isSystemUser = true;
+            group = "utf-nate";
+          };
 
-      services.postgresql = {
-        enable = true;
+          users.groups.utf-nate = { };
 
-        ensureDatabases = [ "utf-nate" ];
-        ensureUsers = [
-          {
-            name = "utf-nate";
-            ensureDBOwnership = true;
-          }
-        ];
-      };
+          services.postgresql = {
+            enable = true;
 
-      systemd.services."utf-nate@" = {
-        description = "UTF-Nate discord bot";
-        after = [ "network.target" ];
-        restartIfChanged = true;
-        serviceConfig = {
-          ExecStart = "${inputs.utf-nate.packages.${pkgs.stdenv.hostPlatform.system}.utf-nate}/bin/utf-nate";
-          PrivateTmp = true;
-          WorkingDirectory = "/etc/utf-nate/%i";
+            ensureDatabases = [ "utf-nate" ];
+            ensureUsers = [
+              {
+                name = "utf-nate";
+                ensureDBOwnership = true;
+              }
+            ];
+          };
+
+          systemd.services."utf-nate@" = {
+            description = "UTF-Nate discord bot";
+            after = [ "network.target" ];
+            restartIfChanged = true;
+            serviceConfig = {
+              ExecStart = "${inputs'.utf-nate.packages.utf-nate}/bin/utf-nate";
+              PrivateTmp = true;
+              WorkingDirectory = "/etc/utf-nate/%i";
+            };
+          };
         };
-      };
-    };
+    }
+  );
 }

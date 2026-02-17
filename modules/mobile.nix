@@ -1,18 +1,20 @@
 {
-  config,
-  lib,
-  pkgs,
-  ...
-}:
+  flake.nixosModules.mobile =
+    {
+      config,
+      lib,
+      pkgs,
+      ...
+    }:
+    {
+      options.my.mobile = {
+        enable = lib.mkEnableOption "mobile tools";
+      };
 
-{
-  options.my.mobile = {
-    enable = lib.mkEnableOption "mobile tools";
-  };
-
-  config = lib.mkIf config.my.mobile.enable {
-    environment.systemPackages = with pkgs; [
-      jmtpfs
-    ];
-  };
+      config = lib.mkIf config.my.mobile.enable {
+        environment.systemPackages = with pkgs; [
+          jmtpfs
+        ];
+      };
+    };
 }

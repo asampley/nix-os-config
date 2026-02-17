@@ -1,49 +1,52 @@
 {
-  config,
-  lib,
-  ...
-}:
-{
-  options.my.http-file-share = {
-    enable = lib.mkEnableOption "share files with http";
+  flake.nixosModules.http-file-share =
+    {
+      config,
+      lib,
+      ...
+    }:
+    {
+      options.my.http-file-share = {
+        enable = lib.mkEnableOption "share files with http";
 
-    serverName =
-      with config.services.avahi;
-      lib.mkOption {
-        type = lib.types.str;
-        default = "${hostName}.${domainName}";
-      };
-  };
-
-  config =
-    let
-      cfg = config.my.http-file-share;
-    in
-    lib.mkIf cfg.enable {
-      # Local host for downloading files
-      services.nginx = {
-        enable = lib.mkDefault true;
-
-        virtualHosts."${cfg.serverName}" = {
-          serverAliases = [
-            "localhost"
-            "127.0.0.1"
-          ];
-
-          locations."= /fileshare" = {
-            return = "301 $scheme://$host$request_uri/";
+        serverName =
+          with config.services.avahi;
+          lib.mkOption {
+            type = lib.types.str;
+            default = "${hostName}.${domainName}";
           };
+      };
 
-          locations."^~ /fileshare/" = {
-            root = "/var/www/";
+      config =
+        let
+          cfg = config.my.http-file-share;
+        in
+        lib.mkIf cfg.enable {
+          # Local host for downloading files
+          services.nginx = {
+            enable = lib.mkDefault true;
 
-            tryFiles = "$uri $uri/ =404";
+            virtualHosts."${cfg.serverName}" = {
+              serverAliases = [
+                "localhost"
+                "127.0.0.1"
+              ];
 
-            extraConfig = ''
-              autoindex on;
-            '';
+              locations."= /fileshare" = {
+                return = "301 $scheme://$host$request_uri/";
+              };
+
+              locations."^~ /fileshare/" = {
+                root = "/var/www/";
+
+                tryFiles = "$uri $uri/ =404";
+
+                extraConfig = ''
+                  autoindex on;
+                '';
+              };
+            };
           };
         };
-      };
     };
 }

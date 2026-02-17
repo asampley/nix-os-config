@@ -1,109 +1,110 @@
-# Edit this configuration file to define what should be installed on
-# your system. Help is available in the configuration.nix(5) man page, on
-# https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
-
+{ self, withSystem, ... }:
 {
-  config,
-  inputs,
-  pkgs,
-  ...
-}:
+  flake.nixosConfigurations.miranda = withSystem "x86_64-linux" (
+    { ... }:
+    self.inputs.nixpkgs.lib.nixosSystem {
+      modules = builtins.attrValues self.nixosModules ++ [
+        (
+          { config, pkgs, ... }:
+          {
+            imports = [
+              # Include the results of the hardware scan.
+              ./hardware-configuration.nix
+              self.inputs.nixos-hardware.nixosModules.framework-12-13th-gen-intel
+            ];
 
-{
-  imports = [
-    # Include the results of the hardware scan.
-    ./hardware-configuration.nix
-    ../../modules
-    inputs.nixos-hardware.nixosModules.framework-12-13th-gen-intel
-  ];
+            # Custom modules
+            my.audio.enable = true;
+            my.bluetooth.enable = true;
+            my.development.enable = true;
+            my.dynamic.enable = true;
+            #my.emulation.enable = true;
+            my.gaming.enable = true;
+            #my.http-file-share.enable = true;
+            my.maintenance.enable = true;
+            my.mobile.enable = true;
+            my.noise-reduce.enable = true;
+            my.oom.enable = true;
+            my.power-saving.enable = true;
+            my.wayland.enable = true;
+            my.x.enable = false;
 
-  # Custom modules
-  my.audio.enable = true;
-  my.bluetooth.enable = true;
-  my.development.enable = true;
-  my.dynamic.enable = true;
-  #my.emulation.enable = true;
-  my.gaming.enable = true;
-  #my.http-file-share.enable = true;
-  my.maintenance.enable = true;
-  my.mobile.enable = true;
-  my.noise-reduce.enable = true;
-  my.oom.enable = true;
-  my.power-saving.enable = true;
-  my.wayland.enable = true;
-  my.x.enable = false;
+            # Use the systemd-boot EFI boot loader.
+            boot.loader.systemd-boot.enable = true;
+            boot.loader.efi.canTouchEfiVariables = true;
 
-  # Use the systemd-boot EFI boot loader.
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
+            networking.hostName = "miranda"; # Define your hostname.
 
-  networking.hostName = "miranda"; # Define your hostname.
+            # Configure keymap in X11
+            services.xserver.xkb.layout = "us";
+            services.xserver.xkb.options = "eurosign:e,caps:escape";
 
-  # Configure keymap in X11
-  services.xserver.xkb.layout = "us";
-  services.xserver.xkb.options = "eurosign:e,caps:escape";
+            # Enable CUPS to print documents.
+            services.printing = {
+              enable = true;
+              browsing = true;
+              drivers = with pkgs; [
+                cups-filters
+                cups-browsed
+                gutenprint
+                #hplip
+                hplipWithPlugin
+              ];
+            };
 
-  # Enable CUPS to print documents.
-  services.printing = {
-    enable = true;
-    browsing = true;
-    drivers = with pkgs; [
-      cups-filters
-      cups-browsed
-      gutenprint
-      #hplip
-      hplipWithPlugin
-    ];
-  };
+            # Enable touchpad support (enabled default in most desktopManager).
+            services.libinput.enable = true;
 
-  # Enable touchpad support (enabled default in most desktopManager).
-  services.libinput.enable = true;
+            programs.firefox.enable = true;
 
-  programs.firefox.enable = true;
+            swapDevices = [
+              {
+                device = "/swapfile";
+                size = 16 * 1024;
+              }
+            ];
 
-  swapDevices = [
-    {
-      device = "/swapfile";
-      size = 16 * 1024;
+            # hibernation
+            boot.kernelParams = [
+              "resume_offset=168685568"
+              "mem_sleep_default=deep"
+            ]; # a better way to do this than check and hardcode?
+            boot.resumeDevice = config.fileSystems."/".device;
+            powerManagement.enable = true;
+            systemd.sleep.extraConfig = ''
+              HibernateDelaySec=15m
+              SuspendState=mem
+            '';
+
+            # power keys
+            services.logind.settings.Login = {
+              HandlePowerKey = "suspend-then-hibernate";
+              HandlePowerKeyLongPress = "poweroff";
+              HandleLidSwitch = "suspend-then-hibernate";
+              HandleLidSwitchDocked = "ignore";
+            };
+
+            # This option defines the first version of NixOS you have installed on this particular machine,
+            # and is used to maintain compatibility with application data (e.g. databases) created on older NixOS versions.
+            #
+            # Most users should NEVER change this value after the initial install, for any reason,
+            # even if you've upgraded your system to a new NixOS release.
+            #
+            # This value does NOT affect the Nixpkgs version your packages and OS are pulled from,
+            # so changing it will NOT upgrade your system - see https://nixos.org/manual/nixos/stable/#sec-upgrading for how
+            # to actually do that.
+            #
+            # This value being lower than the current NixOS release does NOT mean your system is
+            # out of date, out of support, or vulnerable.
+            #
+            # Do NOT change this value unless you have manually inspected all the changes it would make to your configuration,
+            # and migrated your data accordingly.
+            #
+            # For more information, see `man configuration.nix` or https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion .
+            system.stateVersion = "24.11"; # Did you read the comment?
+          }
+        )
+      ];
     }
-  ];
-
-  # hibernation
-  boot.kernelParams = [
-    "resume_offset=168685568"
-    "mem_sleep_default=deep"
-  ]; # a better way to do this than check and hardcode?
-  boot.resumeDevice = config.fileSystems."/".device;
-  powerManagement.enable = true;
-  systemd.sleep.extraConfig = ''
-    HibernateDelaySec=15m
-    SuspendState=mem
-  '';
-
-  # power keys
-  services.logind.settings.Login = {
-    HandlePowerKey = "suspend-then-hibernate";
-    HandlePowerKeyLongPress = "poweroff";
-    HandleLidSwitch = "suspend-then-hibernate";
-    HandleLidSwitchDocked = "ignore";
-  };
-
-  # This option defines the first version of NixOS you have installed on this particular machine,
-  # and is used to maintain compatibility with application data (e.g. databases) created on older NixOS versions.
-  #
-  # Most users should NEVER change this value after the initial install, for any reason,
-  # even if you've upgraded your system to a new NixOS release.
-  #
-  # This value does NOT affect the Nixpkgs version your packages and OS are pulled from,
-  # so changing it will NOT upgrade your system - see https://nixos.org/manual/nixos/stable/#sec-upgrading for how
-  # to actually do that.
-  #
-  # This value being lower than the current NixOS release does NOT mean your system is
-  # out of date, out of support, or vulnerable.
-  #
-  # Do NOT change this value unless you have manually inspected all the changes it would make to your configuration,
-  # and migrated your data accordingly.
-  #
-  # For more information, see `man configuration.nix` or https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion .
-  system.stateVersion = "24.11"; # Did you read the comment?
+  );
 }

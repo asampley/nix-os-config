@@ -1,130 +1,111 @@
+{ moduleWithSystem, ... }:
 {
-  config,
-  inputs,
-  lib,
-  pkgs,
-  ...
-}:
+  flake.nixosModules.default = moduleWithSystem (
+    { inputs', ... }:
+    {
+      config,
+      lib,
+      pkgs,
+      ...
+    }:
+    {
+      time.timeZone = lib.mkDefault "Canada/Mountain";
 
-{
-  imports = [
-    ./audio.nix
-    ./auto-certs.nix
-    ./bittorrent.nix
-    ./bluetooth.nix
-    ./cloud.nix
-    ./development.nix
-    ./dynamic.nix
-    ./emulation.nix
-    ./gaming.nix
-    ./http-file-share.nix
-    ./maintenance.nix
-    ./matrix.nix
-    ./mobile.nix
-    ./noise-reduce.nix
-    ./oom.nix
-    ./power-saving.nix
-    ./utf-nate.nix
-    ./x.nix
-    ./xmpp.nix
-    ./wayland.nix
-  ];
+      # Pick only one of the below networking options.
+      # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+      networking.networkmanager.enable = lib.mkDefault true; # Easiest to use and most distros use this by default.
 
-  time.timeZone = lib.mkDefault "Canada/Mountain";
+      i18n.defaultLocale = lib.mkDefault "en_US.UTF-8";
 
-  # Pick only one of the below networking options.
-  # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
-  networking.networkmanager.enable = lib.mkDefault true; # Easiest to use and most distros use this by default.
+      nix.settings.experimental-features = [
+        "nix-command"
+        "flakes"
+      ];
 
-  i18n.defaultLocale = lib.mkDefault "en_US.UTF-8";
+      # Don't forget to set a password with ‘passwd’.
+      users.users.asampley = {
+        isNormalUser = true;
+        extraGroups = [
+          "wheel"
+          "plugdev"
+        ]
+        ++ lib.optional config.services.nginx.enable "nginx"
+        ++ lib.optional config.virtualisation.docker.enable "docker";
+        openssh.authorizedKeys.keys = [
+          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGDHPkbNhmExKEsUQ9gn+IzYzRhnG49Q+rwZ/S+mascf asampley@amanda"
+          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDDtgero+Wbw7kq/5t8ylM+tUnRh1o0ca1jTrh9r32PS asampley@miranda"
+        ];
+      };
 
-  nix.settings.experimental-features = [
-    "nix-command"
-    "flakes"
-  ];
+      nixpkgs.config.allowUnfreePredicate =
+        pkg:
+        builtins.elem (lib.getName pkg) [
+          "hplip"
+          "steam"
+          "steam-original"
+          "steam-unwrapped"
+          "steam-run"
+          "nvidia-x11"
+          "nvidia-settings"
+          "nvidia-persistenced"
+        ];
 
-  # Don't forget to set a password with ‘passwd’.
-  users.users.asampley = {
-    isNormalUser = true;
-    extraGroups = [
-      "wheel"
-      "plugdev"
-    ]
-    ++ lib.optional config.services.nginx.enable "nginx"
-    ++ lib.optional config.virtualisation.docker.enable "docker";
-    openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGDHPkbNhmExKEsUQ9gn+IzYzRhnG49Q+rwZ/S+mascf asampley@amanda"
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDDtgero+Wbw7kq/5t8ylM+tUnRh1o0ca1jTrh9r32PS asampley@miranda"
-    ];
-  };
+      # List packages installed in system profile. To search, run:
+      # $ nix search wget
+      environment.systemPackages = with pkgs; [
+        git
+        inputs'.nix-alien.packages.nix-alien
+        vim
+        wget
+      ];
 
-  nixpkgs.config.allowUnfreePredicate =
-    pkg:
-    builtins.elem (lib.getName pkg) [
-      "hplip"
-      "steam"
-      "steam-original"
-      "steam-unwrapped"
-      "steam-run"
-      "nvidia-x11"
-      "nvidia-settings"
-      "nvidia-persistenced"
-    ];
+      services.avahi = {
+        # Enable avahi to discover local services
+        enable = true;
+        # Enable transparent query to avahi daemon
+        nssmdns4 = true;
+      };
 
-  # List packages installed in system profile. To search, run:
-  # $ nix search wget
-  environment.systemPackages = with pkgs; [
-    git
-    inputs.nix-alien.packages.${pkgs.stdenv.hostPlatform.system}.nix-alien
-    vim
-    wget
-  ];
+      # Allow users to specify allow_other or allow_root on fuse mounts
+      programs.fuse.userAllowOther = true;
 
-  services.avahi = {
-    # Enable avahi to discover local services
-    enable = true;
-    # Enable transparent query to avahi daemon
-    nssmdns4 = true;
-  };
+      security.acme.defaults = {
+        webroot = "/var/lib/acme/acme-challenge";
+        email = "alex.sampley@gmail.com";
+      };
 
-  # Allow users to specify allow_other or allow_root on fuse mounts
-  programs.fuse.userAllowOther = true;
+      services.rsnapshot = {
+        extraConfig = ''
+          retain hourly 24
+          retain daily 365
+          retain monthly 12
+          retain yearly 10
+        '';
+        cronIntervals = {
+          hourly = "0 * * * *";
+          daily = "1 0 * * *";
+          monthly = "2 0 1 * *";
+          yearly = "3 0 1 1 *";
+        };
+      };
 
-  security.acme.defaults = {
-    webroot = "/var/lib/acme/acme-challenge";
-    email = "alex.sampley@gmail.com";
-  };
+      # Default virtual host to block unknown server names.
+      services.nginx.virtualHosts."_" = {
+        default = true;
+        extraConfig = "return 404;";
+      };
 
-  services.rsnapshot = {
-    extraConfig = ''
-      retain hourly 24
-      retain daily 365
-      retain monthly 12
-      retain yearly 10
-    '';
-    cronIntervals = {
-      hourly = "0 * * * *";
-      daily = "1 0 * * *";
-      monthly = "2 0 1 * *";
-      yearly = "3 0 1 1 *";
-    };
-  };
+      services.libinput.touchpad = {
+        clickMethod = "clickfinger";
+      };
 
-  # Default virtual host to block unknown server names.
-  services.nginx.virtualHosts."_" = {
-    default = true;
-    extraConfig = "return 404;";
-  };
+      programs.ssh.knownHosts = {
+        "fm2515.rsync.net" = {
+          publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINdUkGe6kKn5ssz4WRZKjcws0InbQqZayenzk9obmP1z";
+        };
+      };
 
-  services.libinput.touchpad = {
-    clickMethod = "clickfinger";
-  };
-
-  programs.ssh.knownHosts = {
-    "fm2515.rsync.net" = {
-      publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINdUkGe6kKn5ssz4WRZKjcws0InbQqZayenzk9obmP1z";
-    };
-  };
-
-  hardware.steam-hardware.enable = true;
+      hardware.steam-hardware.enable = true;
+    }
+  );
 }
