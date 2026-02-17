@@ -39,6 +39,14 @@
             boot.loader.systemd-boot.enable = true;
             boot.loader.efi.canTouchEfiVariables = true;
 
+            system.autoUpgrade = {
+              allowReboot = true;
+              rebootWindow = {
+                lower = "02:00";
+                upper = "03:00";
+              };
+            };
+
             networking.hostName = "willheim"; # Define your hostname.
 
             # Enable CUPS to print documents.
