@@ -63,7 +63,7 @@
         };
       };
 
-      systemd.services.nextcloud-custom-config = {
+      systemd.services.nextcloud-custom-config = lib.mkIf cfg.nextcloud.enable {
         path = [
           config.services.nextcloud.occ
         ];
@@ -74,17 +74,17 @@
         wantedBy = [ "multi-user.target" ];
       };
 
-      services.nginx.virtualHosts."${cfg.nextcloud.hostName}" = {
+      services.nginx.virtualHosts."${cfg.nextcloud.hostName}" = lib.mkIf cfg.nextcloud.enable {
         enableACME = cfg.nextcloud.https;
         forceSSL = cfg.nextcloud.https;
       };
 
-      networking.firewall.allowedTCPPorts = lib.optionals cfg.nextcloud.https [
+      networking.firewall.allowedTCPPorts = lib.optionals (cfg.nextcloud.enable && cfg.nextcloud.https) [
         443
         80
       ];
 
-      services.postgresql = {
+      services.postgresql = lib.mkIf cfg.nextcloud.enable {
         enable = true;
 
         ensureDatabases = [ "nextcloud" ];
@@ -96,12 +96,12 @@
         ];
       };
 
-      systemd.services."nextcloud-setup" = {
+      systemd.services."nextcloud-setup" = lib.mkIf cfg.nextcloud.enable {
         requires = [ "postgresql.service" ];
         after = [ "postgresql.service" ];
       };
 
-      services.borgbackup.jobs = lib.mkIf cfg.nextcloud.borgbackup.enable {
+      services.borgbackup.jobs = lib.mkIf (cfg.nextcloud.enable && cfg.nextcloud.borgbackup.enable) {
         "${cfg.nextcloud.borgbackup.name}" =
           let
             cfgnc = config.services.nextcloud;
