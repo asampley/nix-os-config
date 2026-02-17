@@ -27,10 +27,9 @@
     flake-parts.lib.mkFlake { inherit inputs; } (top: {
       imports = [
         (inputs.import-tree ./modules)
-        #(((inputs.import-tree.map inputs.nixpkgs.lib.traceVal).filter (p: inputs.nixpkgs.lib.baseNameOf p == "hardware-configuration.nix")) ./hosts)
-        ./hosts/amanda/configuration.nix
-        ./hosts/miranda/configuration.nix
-        ./hosts/willheim/configuration.nix
+        ((inputs.import-tree.filter (p: inputs.nixpkgs.lib.baseNameOf p != "hardware-configuration.nix"))
+          ./hosts
+        )
       ];
       systems = import ./systems.nix;
       perSystem =
