@@ -1,7 +1,7 @@
 { self, withSystem, ... }:
 {
   flake.nixosConfigurations.willheim = withSystem "x86_64-linux" (
-    { ... }:
+    { inputs', ... }:
     self.inputs.nixpkgs.lib.nixosSystem {
       modules = builtins.attrValues self.nixosModules ++ [
         (
@@ -86,8 +86,8 @@
               activity = { Watching = { name = "\U0001F440" } }
             '';
 
-            environment.etc."utf-nate/1/resources".source = "${pkgs.utf-nate}/resources";
-            environment.etc."utf-nate/2/resources".source = "${pkgs.utf-nate}/resources";
+            environment.etc."utf-nate/1/resources".source = "${inputs'.utf-nate.packages.utf-nate}/resources";
+            environment.etc."utf-nate/2/resources".source = "${inputs'.utf-nate.packages.utf-nate}/resources";
 
             systemd.targets.multi-user.wants = [
               "utf-nate@1.service"
