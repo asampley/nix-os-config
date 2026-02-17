@@ -4,7 +4,7 @@
 
 {
   config,
-  lib,
+  inputs,
   pkgs,
   ...
 }:
@@ -14,6 +14,7 @@
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
     ../../modules
+    inputs.nixos-hardware.nixosModules.framework-12-13th-gen-intel
   ];
 
   # Custom modules
