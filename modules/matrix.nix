@@ -64,7 +64,7 @@
           lib.mkIf (cfg.tuwunel.domainName != null)
             {
               enableACME = true;
-              onlySSL = true;
+              addSSL = true;
               locations = {
                 "/" = {
                   proxyPass = "http://localhost:${builtins.toString (builtins.elemAt config.services.matrix-tuwunel.settings.global.port 0)}";
