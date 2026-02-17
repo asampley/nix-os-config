@@ -20,11 +20,8 @@
   };
 
   outputs =
-    inputs@{
-      flake-parts,
-      ...
-    }:
-    flake-parts.lib.mkFlake { inherit inputs; } (top: {
+    inputs:
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } (top: {
       imports = [
         (inputs.import-tree ./modules)
         ((inputs.import-tree.filter (p: inputs.nixpkgs.lib.baseNameOf p != "hardware-configuration.nix"))
