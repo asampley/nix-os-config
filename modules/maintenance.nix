@@ -30,9 +30,14 @@
           ];
         };
 
-        # Retry just in case network conditions are bad (e.g. hibernation)
         systemd.services.nixos-upgrade = {
+          unitConfig = {
+            OnSuccess = [ "notify-on-success@nixos-upgrade.service" ];
+            OnFailure = [ "notify-on-failure@nixos-upgrade.service" ];
+          };
+
           serviceConfig = {
+            # Retry just in case network conditions are bad (e.g. hibernation)
             Restart = "on-failure";
             RestartSec = "1m";
             RestartSteps = "10";
