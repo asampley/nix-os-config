@@ -1,20 +1,24 @@
+{ lib, ... }:
 {
   flake.nixosModules.matrix =
     {
       config,
-      lib,
       ...
     }:
     {
       options.my.matrix = with lib; {
         tuwunel = {
-          enable = lib.mkEnableOption "tuwunel matrix server";
-          domainName = lib.mkOption {
+          enable = mkEnableOption "tuwunel matrix server";
+          domainName = mkOption {
             type = types.str;
             default = "matrix.${config.my.matrix.tuwunel.publicDomainName}";
           };
-          publicDomainName = lib.mkOption {
+          publicDomainName = mkOption {
             type = types.str;
+          };
+          registrationTokenFile = mkOption {
+            type = types.str;
+            description = "allow registration with a token";
           };
         };
       };
@@ -31,8 +35,8 @@
                 server_name = "${cfg.tuwunel.publicDomainName}";
                 port = [ 8008 ];
                 allow_federation = false;
-                allow_registration = true;
-                registration_token_file = "/etc/tuwunel/.reg_token";
+                allow_registration = (cfg.tuwunel.registrationTokenFile != null);
+                registration_token_file = "${cfg.tuwunel.registrationTokenFile}";
               };
             };
 
@@ -74,5 +78,22 @@
                 };
           })
         ];
+    };
+
+  flake.nixosModules.matrix-sops =
+    { config, ... }:
+    {
+      options.my.matrix = with lib; {
+        tuwunel.sops.enable = mkEnableOption "sops management of secrets";
+      };
+
+      config = lib.mkIf config.my.matrix.tuwunel.sops.enable {
+        sops.secrets."tuwunel/registration-token" = {
+          owner = config.services.matrix-tuwunel.user;
+          restartUnits = [ "tuwunel.service" ];
+        };
+
+        my.matrix.tuwunel.registrationTokenFile = config.sops.secrets."tuwunel/registration-token".path;
+      };
     };
 }

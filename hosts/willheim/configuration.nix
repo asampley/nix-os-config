@@ -18,22 +18,20 @@
             my.matrix.tuwunel = {
               enable = true;
               publicDomainName = "asampley.ca";
+              sops.enable = true;
             };
             my.cloud.nextcloud = {
               enable = true;
               hostName = "cloud.asampley.ca";
               https = true;
               borgbackup.enable = true;
+              sops.enable = true;
             };
             my.bittorrent.opentracker = {
               enable = true;
               supportReverseProxy = true;
             };
-            #my.xmpp.prosody = {
-            #  enable = true;
-            #  publicDomainName = "asampley.ca";
-            #  openFirewall = true;
-            #};
+            my.sops.enable = true;
             my.utf-nate.enable = true;
 
             # Use the systemd-boot EFI boot loader.
@@ -103,6 +101,8 @@
               "utf-nate@2.service"
             ];
 
+            sops.secrets.borg-pass = { };
+
             services.borgbackup.jobs."${config.my.cloud.nextcloud.borgbackup.name}" = {
               repo = "ssh://fm2515@fm2515.rsync.net/./backup/nextcloud";
 
@@ -113,7 +113,7 @@
 
               encryption = {
                 mode = "repokey";
-                passCommand = "cat /root/borg.pass";
+                passCommand = "cat ${config.sops.secrets.borg-pass.path}";
               };
             };
 
