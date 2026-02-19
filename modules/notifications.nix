@@ -39,17 +39,24 @@ let
     { config, pkgs, ... }:
     let
       cfg = config.my.notifications;
+      ntfy-command =
+        status:
+        lib.optional cfg.ntfy.enable (
+          lib.strings.concatStringsSep " " (
+            [
+              ''${pkgs.curl}/bin/curl '${cfg.ntfy.address}'/"$1"''
+              ''-d ${config.networking.hostName}'": $1 service ${status}."''
+            ]
+            ++ lib.optional (
+              cfg.ntfy.authentication-file != null
+            ) ''-u "$(cat "${cfg.ntfy.authentication-file}")"''
+          )
+        );
     in
     {
       my.notifications = {
-        on-failure.script = lib.strings.concatLines (
-          [ ]
-          ++ lib.optional cfg.ntfy.enable ''${pkgs.curl}/bin/curl '${cfg.ntfy.address}'/"$1" -d '${config.networking.hostName}'": $1 service failed."''
-        );
-        on-success.script = lib.strings.concatLines (
-          [ ]
-          ++ lib.optional cfg.ntfy.enable ''${pkgs.curl}/bin/curl '${cfg.ntfy.address}'/"$1" -d '${config.networking.hostName}'": $1 service succeeded."''
-        );
+        on-failure.script = lib.strings.concatLines ([ ] ++ ntfy-command "failed");
+        on-success.script = lib.strings.concatLines ([ ] ++ ntfy-command "succeeded");
       };
     };
 in
@@ -72,11 +79,35 @@ in
       };
     };
 
+  flake.nixosModules.ntfy-client-sops =
+    { config, ... }:
+    {
+      options.my.ntfy-client-sops = {
+        enable = "ntfy password management with sops";
+      };
+
+      config =
+        let
+          cfg = config.my.ntfy-client-sops;
+        in
+        lib.mkIf cfg.enable {
+          authentication-file = config.sops.secrets.ntfy.path;
+        };
+    };
+
   flake.nixosModules.notifications = moduleWithSystem (
     { self', ... }:
     { config, pkgs, ... }:
     {
-      options = shared-options;
+      options =
+        with lib;
+        shared-options
+        // {
+          authentication-file = mkOption {
+            type = str;
+            description = "path containing authentication string for curl with ntfy";
+          };
+        };
       config = lib.mkMerge [
         (shared-config { inherit config pkgs; })
         (

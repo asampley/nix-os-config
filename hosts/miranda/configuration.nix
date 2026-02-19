@@ -4,13 +4,14 @@
     { ... }:
     self.inputs.nixpkgs.lib.nixosSystem {
       modules = builtins.attrValues self.nixosModules ++ [
+        self.inputs.nixos-hardware.nixosModules.framework-12-13th-gen-intel
+        self.inputs.sops-nix.nixosModules.sops
         (
           { config, pkgs, ... }:
           {
             imports = [
               # Include the results of the hardware scan.
               ./hardware-configuration.nix
-              self.inputs.nixos-hardware.nixosModules.framework-12-13th-gen-intel
             ];
 
             # Custom modules
@@ -30,6 +31,7 @@
             };
             my.oom.enable = true;
             my.power-saving.enable = true;
+            my.sops.enable = true;
             my.wayland.enable = true;
             my.x.enable = false;
 

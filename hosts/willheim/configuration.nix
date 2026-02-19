@@ -4,8 +4,9 @@
     { inputs', ... }:
     self.inputs.nixpkgs.lib.nixosSystem {
       modules = builtins.attrValues self.nixosModules ++ [
+        self.inputs.sops-nix.nixosModules.sops
         (
-          { config, pkgs, ... }:
+          { config, ... }:
           {
             imports = [
               ./hardware-configuration.nix

@@ -4,6 +4,7 @@
     { ... }:
     self.inputs.nixpkgs.lib.nixosSystem {
       modules = builtins.attrValues self.nixosModules ++ [
+        self.inputs.sops-nix.nixosModules.sops
         (
           { pkgs, ... }:
           {

@@ -17,6 +17,11 @@
     };
 
     nix-alien.url = "github:thiagokokada/nix-alien";
+
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
