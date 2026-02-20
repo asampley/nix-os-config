@@ -41,6 +41,7 @@
             my.sops.enable = true;
             my.wayland.enable = true;
             my.x.enable = false;
+            my.zsa-keyboard.enable = true;
 
             # Use the systemd-boot EFI boot loader.
             boot.loader.systemd-boot.enable = true;
