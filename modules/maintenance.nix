@@ -1,10 +1,7 @@
+{ lib, ... }:
 {
   flake.nixosModules.maintenance =
-    {
-      config,
-      lib,
-      ...
-    }:
+    { config, ... }:
     {
       options.my.maintenance = {
         enable = lib.mkEnableOption "automatic maintenance tasks";
@@ -31,10 +28,6 @@
         };
 
         systemd.services.nixos-upgrade = {
-          unitConfig = {
-            OnSuccess = [ "notify-on-success@nixos-upgrade.service" ];
-            OnFailure = [ "notify-on-failure@nixos-upgrade.service" ];
-          };
 
           serviceConfig = {
             # Retry just in case network conditions are bad (e.g. hibernation)
@@ -42,6 +35,23 @@
             RestartSec = "1m";
             RestartSteps = "10";
             RestartMaxDelaySec = "1h";
+          };
+        };
+      };
+    };
+
+  flake.nixosModules.maintenance-notifications =
+    { config, ... }:
+    {
+      options.my.maintenance.notifications = {
+        enable = lib.mkEnableOption "notifications for maintenance tasks";
+      };
+
+      config = lib.mkIf config.my.maintenance.notifications.enable {
+        systemd.services.nixos-upgrades = {
+          unitConfig = {
+            OnSuccess = [ "notify-on-success@nixos-upgrade.service" ];
+            OnFailure = [ "notify-on-failure@nixos-upgrade.service" ];
           };
         };
       };

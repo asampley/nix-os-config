@@ -22,13 +22,20 @@
             #my.emulation.enable = true;
             my.gaming.enable = true;
             #my.http-file-share.enable = true;
-            my.maintenance.enable = true;
+
+            my.maintenance = {
+              enable = true;
+              notifications.enable = true;
+            };
+
             my.mobile.enable = true;
             my.noise-reduce.enable = true;
+
             my.notifications = {
               enable = true;
               libnotify.enable = true;
             };
+
             my.oom.enable = true;
             my.power-saving.enable = true;
             my.sops.enable = true;

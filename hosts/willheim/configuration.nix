@@ -14,12 +14,18 @@
 
             # Custom modules
             my.auto-certs.enable = true;
-            my.maintenance.enable = true;
+
+            my.maintenance = {
+              enable = true;
+              notifications.enable = true;
+            };
+
             my.matrix.tuwunel = {
               enable = true;
               publicDomainName = "asampley.ca";
               sops.enable = true;
             };
+
             my.cloud.nextcloud = {
               enable = true;
               hostName = "cloud.asampley.ca";
@@ -27,10 +33,12 @@
               borgbackup.enable = true;
               sops.enable = true;
             };
+
             my.bittorrent.opentracker = {
               enable = true;
               supportReverseProxy = true;
             };
+
             my.sops.enable = true;
             my.utf-nate.enable = true;
 
