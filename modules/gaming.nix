@@ -1,8 +1,8 @@
+{ lib, ... }:
 {
   flake.nixosModules.gaming =
     {
       config,
-      lib,
       pkgs,
       ...
     }:
@@ -23,6 +23,16 @@
         environment.systemPackages = with pkgs; [
           steam-run
           vulkan-tools
+        ];
+      };
+    };
+
+  flake.homeModules.games =
+    { pkgs, ... }:
+    {
+      config = {
+        home.packages = with pkgs; [
+          prismlauncher
         ];
       };
     };

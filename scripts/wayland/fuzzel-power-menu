@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+set -eu
+
+option=$(fuzzel --dmenu --minimal-lines <<-EOF
+	Lock
+	Sleep
+	Suspend
+	Reboot
+	Hibernate
+	Power off
+EOF
+)
+
+case ${option} in
+	"Lock") loginctl lock-session ;;
+	"Sleep") loginctl lock-session && systemctl sleep ;;
+	"Suspend") loginctl lock-session && systemctl suspend ;;
+	"Reboot") reboot ;;
+	"Hibernate") systemctl hibernate ;;
+	"Power off") systemctl poweroff ;;
+esac

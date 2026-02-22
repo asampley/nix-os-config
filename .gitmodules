@@ -1,0 +1,6 @@
+[submodule "files/.config/nvim"]
+	path = files/.config/nvim
+	url = https://github.com/asampley/nvim-config
+[submodule "files/.config/awesome"]
+	path = files/.config/awesome
+	url = https://github.com/asampley/awesomewm-config

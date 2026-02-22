@@ -1,0 +1,23 @@
+// -*- mode: jsonc -*-
+{
+	"modules-left": [
+		"custom/niri-overview",
+		"niri/workspaces"
+	],
+	"modules-center": [
+		"niri/window"
+	],
+	"niri/workspaces": {
+		"format": "{index}"
+	},
+	"niri/window": {
+		"format": "{title}",
+		"separate-outputs": true,
+		"icon": true
+	},
+	"custom/niri-overview": {
+		"format": "  ",
+		"tooltip-format": "Overview",
+		"on-click": "niri msg action toggle-overview"
+	}
+}

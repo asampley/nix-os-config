@@ -1,0 +1,21 @@
+set -eu
+
+PATH=/run/current-system/sw/bin
+
+if [ $1 == "off" ]; then
+	state="off"
+else
+	state="on"
+fi
+
+printf "Switching monitors to state %s\n" "${state}"
+
+case "$XDG_SESSION_DESKTOP" in
+	niri)
+		set -x
+		niri msg action power-$1-monitors
+		;;
+	*)
+		printf "Window manager not detected\n"
+		;;
+esac

@@ -1,0 +1,11 @@
+// -*- mode: jsonc -*-
+{
+	"include": [
+		// Optional profile that can switch
+		"profile.jsonc",
+		// Optional window manager specific config that can switch
+		"wm.jsonc",
+		// Shared settings with lowest priority
+		"default.jsonc"
+	]
+}

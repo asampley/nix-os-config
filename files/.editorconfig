@@ -1,0 +1,29 @@
+[*]
+indent_style = tab
+charset = utf-8
+insert_final_newline = true
+
+# Explictly mention trim whitespace, as it is more destructive
+[.profile,.bash{rc,_aliases,_logout,_profile},*.{bash,c,cpp,cs,css,html,lua,java,js,py,rs,scm,sh,ts,toml,txt,vue,xhtml,xml,yaml,yml}]
+trim_trailing_whitespace = true
+
+# File types where tabs are meaningful as indentation
+[.profile,.bash{rc,_profile,_logout},*.{bash,sh}]
+indent_style = tab
+
+# Markdown has a defined indent of 4 spaces
+# Trailing spaces mark a new line
+[*.md]
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = false
+
+# Nix prints errors expecting a standard 2 space format
+[{*.nix,flake.lock}]
+indent_style = space
+indent_size = 2
+
+# Yaml often will not parse tabs
+[*.{yaml,yml}]
+indent_style = space
+indent_size = 4

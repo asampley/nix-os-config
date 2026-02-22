@@ -11,6 +11,11 @@
     flake-parts.url = "github:hercules-ci/flake-parts";
     import-tree.url = "github:vic/import-tree";
 
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     utf-nate = {
       url = "github:asampley/UTF-Nate";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -28,6 +33,7 @@
     inputs:
     inputs.flake-parts.lib.mkFlake { inherit inputs; } (top: {
       imports = [
+        inputs.home-manager.flakeModules.home-manager
         (inputs.import-tree ./modules)
         ((inputs.import-tree.filter (p: inputs.nixpkgs.lib.baseNameOf p != "hardware-configuration.nix"))
           ./hosts

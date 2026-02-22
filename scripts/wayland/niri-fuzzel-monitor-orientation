@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+set -eu
+
+option=$(fuzzel --dmenu --minimal-lines <<-EOF
+	normal
+	90
+	180
+	270
+	flipped
+	flipped-90
+	flipped-180
+	flipped-270
+EOF
+)
+
+output=$(niri msg focused-output | sed -n '/^Output/s/.*(\(.*\))/\1/p;')
+
+niri msg output "${output}" transform "${option}"
