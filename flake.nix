@@ -16,6 +16,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Unified style settings for many programs
+    stylix = {
+      url = "github:danth/stylix";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.systems.follows = "systems";
+    };
+
     utf-nate = {
       url = "github:asampley/UTF-Nate";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -44,6 +51,75 @@
         { pkgs, ... }:
         {
           formatter = pkgs.nixfmt;
+          legacyPackages = {
+            # Home configurations defined as legacy packages to allow having a default for all systems.
+            #
+            # Currently it seemse like legacyPackages is checked first for a valid configuration, so all must be here.
+            homeConfigurations =
+              builtins.mapAttrs (_: value: inputs.home-manager.lib.homeManagerConfiguration value)
+                {
+                  "asampley" = {
+                    inherit pkgs;
+                    modules = with inputs.self.homeModules; [
+                      default
+                    ];
+                  };
+                  "asampley@amanda" = {
+                    inherit pkgs;
+                    modules = with inputs.self.homeModules; [
+                      inputs.stylix.homeModules.stylix
+                      default
+                      games
+                      gui
+                      notifications
+                      podman
+                      stylix
+                      wayland
+                      wine
+                      {
+                        config.my.notifications = {
+                          enable = true;
+                          libnotify.enable = true;
+                        };
+                      }
+                    ];
+                  };
+                  "asampley@miranda" = {
+                    inherit pkgs;
+                    modules =
+                      with inputs.self.homeModules;
+                      [
+                        inputs.sops-nix.homeModules.sops
+                        inputs.stylix.homeModules.stylix
+                        default
+                        games
+                        gui
+                        nextcloud
+                        nextcloud-sops
+                        notifications
+                        ntfy-client-sops
+                        podman
+                        sops
+                        stylix
+                        tablet
+                        wayland
+                        wine
+                        {
+                          config.my.tablet.niri = true;
+                          config.my.notifications = {
+                            enable = true;
+                            libnotify.enable = true;
+                            ntfy = {
+                              enable = true;
+                              address = "https://ntfy.asampley.ca";
+                              sops.enable = true;
+                            };
+                          };
+                        }
+                      ];
+                  };
+                };
+          };
         };
     });
 }
