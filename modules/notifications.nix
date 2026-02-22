@@ -41,27 +41,18 @@ let
         };
       };
     };
-  shared-config =
-    { config, pkgs, ... }:
+  ntfy-command = { config, pkgs, ... }: topic: prefix: status: 
     let
       cfg = config.my.notifications;
-      ntfy-command = prefix: status: ''
-        ${pkgs.curl}/bin/curl '${cfg.ntfy.address}/system' -d '${prefix} '"''$(${pkgs.coreutils}/bin/uname -n): $1 service ${status}." ${
-          if (cfg.ntfy.authentication-file != null) then
-            ''-u "$(cat "${cfg.ntfy.authentication-file}")"''
-          else
-            ""
-        }
-      '';
     in
-    {
-      my.notifications = lib.mkMerge [
-        (lib.mkIf cfg.ntfy.enable {
-          on-failure.script = ntfy-command "🔴" "failed";
-          on-success.script = ntfy-command "🟢" "succeeded";
-        })
-      ];
-    };
+    ''
+      ${pkgs.curl}/bin/curl '${cfg.ntfy.address}/system' -d '${prefix} '"''$(${pkgs.coreutils}/bin/uname -n): $1 service ${status}." ${
+        if (cfg.ntfy.authentication-file != null) then
+          ''-u "$(cat "${cfg.ntfy.authentication-file}")"''
+        else
+          ""
+      }
+    '';
   ntfy-client-sops =
     { config, ... }:
     {
@@ -99,16 +90,19 @@ in
     { config, pkgs, ... }:
     {
       options = shared-options;
-      config = lib.mkMerge [
-        (shared-config { inherit config pkgs; })
-        (
-          let
-            cfg = config.my.notifications;
-          in
+      config = 
+        let
+          cfg = config.my.notifications;
+        in lib.mkMerge [
+          (lib.mkIf cfg.libnotify.enable {
+            my.notifications.on-failure.script = ''${self'.packages.notify-send-all}/bin/notify-send-all "$1 service failed." --urgency critical;'';
+            my.notifications.on-success.script = ''${self'.packages.notify-send-all}/bin/notify-send-all "$1 service succeeded.";'';
+          })
+          (lib.mkIf cfg.ntfy.enable {
+            my.notifications.on-failure.script = ntfy-command { inherit config pkgs; } "system" "🔴" "failed";
+            my.notifications.on-success.script = ntfy-command { inherit config pkgs; } "system" "🟢" "succeeded";
+          })
           {
-            my.notifications.on-failure.script = lib.mkIf cfg.libnotify.enable ''${self'.packages.notify-send-all}/bin/notify-send-all "$1 service failed." --urgency critical;'';
-            my.notifications.on-success.script = lib.mkIf cfg.libnotify.enable ''${self'.packages.notify-send-all}/bin/notify-send-all "$1 service succeeded.";'';
-
             systemd.services = lib.mkIf cfg.enable {
               "notify-on-failure@" = {
                 unitConfig.Description = "runs a script notifying %i has failed";
@@ -120,8 +114,7 @@ in
               };
             };
           }
-        )
-      ];
+        ];
     }
   );
 
@@ -129,16 +122,20 @@ in
     { config, pkgs, ... }:
     {
       options = shared-options;
-      config = lib.mkMerge [
-        (shared-config { inherit config pkgs; })
-        (
-          let
-            cfg = config.my.notifications;
-          in
-          {
+      config =
+        let
+          cfg = config.my.notifications;
+        in
+        lib.mkMerge [
+          (lib.mkIf cfg.libnotify.enable {
             my.notifications.on-failure.script = lib.mkIf cfg.libnotify.enable ''${pkgs.libnotify}/bin/notify-send "$1 service failed." --urgency critical;'';
             my.notifications.on-success.script = lib.mkIf cfg.libnotify.enable ''${pkgs.libnotify}/bin/notify-send "$1 service succeeded.";'';
-
+          })
+          (lib.mkIf cfg.ntfy.enable {
+            my.notifications.on-failure.script = ntfy-command { inherit config pkgs; } "home" "🔴" "failed";
+            my.notifications.on-success.script = ntfy-command { inherit config pkgs; } "home" "🟢" "succeeded";
+          })
+          {
             systemd.user.services = lib.mkIf cfg.enable {
               "notify-on-failure@" = {
                 Unit.Description = "runs a script notifying %i has failed";
@@ -150,8 +147,7 @@ in
               };
             };
           }
-        )
-      ];
+        ];
     };
 
   flake.nixosModules.ntfy-client-sops = ntfy-client-sops;
@@ -215,5 +211,4 @@ in
         my.ntfy.environmentFiles = [ config.sops.secrets."ntfy/environment".path ];
       };
     };
-
 }
