@@ -43,7 +43,7 @@
             services.nginx.virtualHosts."${cfg.tuwunel.publicDomainName}" =
               lib.mkIf (cfg.tuwunel.publicDomainName != null)
                 {
-                  addSSL = true;
+                  forceSSL = true;
                   enableACME = true;
                   locations = {
                     "= /.well-known/matrix/server" = {
@@ -68,7 +68,7 @@
               lib.mkIf (cfg.tuwunel.domainName != null)
                 {
                   enableACME = true;
-                  addSSL = true;
+                  forceSSL = true;
                   locations = {
                     "/" = {
                       proxyPass = "http://localhost:${toString (builtins.elemAt config.services.matrix-tuwunel.settings.global.port 0)}";

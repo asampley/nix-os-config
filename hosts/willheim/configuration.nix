@@ -15,6 +15,19 @@
             # Custom modules
             my.auto-certs.enable = true;
 
+            my.bittorrent.opentracker = {
+              enable = true;
+              supportReverseProxy = true;
+            };
+
+            my.cloud.nextcloud = {
+              enable = true;
+              hostName = "cloud.asampley.ca";
+              https = true;
+              borgbackup.enable = true;
+              sops.enable = true;
+            };
+
             my.maintenance = {
               enable = true;
               notifications.enable = true;
@@ -26,17 +39,20 @@
               sops.enable = true;
             };
 
-            my.cloud.nextcloud = {
+            my.notifications = {
               enable = true;
-              hostName = "cloud.asampley.ca";
-              https = true;
-              borgbackup.enable = true;
-              sops.enable = true;
+              ntfy = {
+                enable = true;
+                address = "http://localhost:2586";
+                sops.enable = true;
+              };
             };
 
-            my.bittorrent.opentracker = {
+            my.ntfy = {
               enable = true;
-              supportReverseProxy = true;
+              base-url = "https://ntfy.asampley.ca";
+              openFirewall = true;
+              sops.enable = true;
             };
 
             my.sops.enable = true;

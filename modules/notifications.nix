@@ -32,6 +32,12 @@ let
             description = "address to send requests to";
             example = "willheim.local";
           };
+          authentication-file = mkOption {
+            type = nullOr str;
+            description = "path containing authentication string for curl with ntfy";
+            default = null;
+          };
+
         };
       };
     };
@@ -39,25 +45,22 @@ let
     { config, pkgs, ... }:
     let
       cfg = config.my.notifications;
-      ntfy-command =
-        status:
-        lib.optional cfg.ntfy.enable (
-          lib.strings.concatStringsSep " " (
-            [
-              ''${pkgs.curl}/bin/curl '${cfg.ntfy.address}'/"$1"''
-              ''-d ${config.networking.hostName}'": $1 service ${status}."''
-            ]
-            ++ lib.optional (
-              cfg.ntfy.authentication-file != null
-            ) ''-u "$(cat "${cfg.ntfy.authentication-file}")"''
-          )
-        );
+      ntfy-command = prefix: status: ''
+                  ${pkgs.curl}/bin/curl '${cfg.ntfy.address}/system' -d '${prefix} ${config.networking.hostName}'": $1 service ${status}." ${
+                    if (cfg.ntfy.authentication-file != null) then
+                      ''-u "$(cat "${cfg.ntfy.authentication-file}")"''
+                    else
+                      ""
+                  }
+        	'';
     in
     {
-      my.notifications = {
-        on-failure.script = lib.strings.concatLines ([ ] ++ ntfy-command "failed");
-        on-success.script = lib.strings.concatLines ([ ] ++ ntfy-command "succeeded");
-      };
+      my.notifications = lib.mkMerge [
+        (lib.mkIf cfg.ntfy.enable {
+          on-failure.script = ntfy-command "🔴" "failed";
+          on-success.script = ntfy-command "🟢" "succeeded";
+        })
+      ];
     };
 in
 {
@@ -79,35 +82,11 @@ in
       };
     };
 
-  flake.nixosModules.ntfy-client-sops =
-    { config, ... }:
-    {
-      options.my.ntfy-client-sops = {
-        enable = "ntfy password management with sops";
-      };
-
-      config =
-        let
-          cfg = config.my.ntfy-client-sops;
-        in
-        lib.mkIf cfg.enable {
-          authentication-file = config.sops.secrets.ntfy.path;
-        };
-    };
-
   flake.nixosModules.notifications = moduleWithSystem (
     { self', ... }:
     { config, pkgs, ... }:
     {
-      options =
-        with lib;
-        shared-options
-        // {
-          authentication-file = mkOption {
-            type = str;
-            description = "path containing authentication string for curl with ntfy";
-          };
-        };
+      options = shared-options;
       config = lib.mkMerge [
         (shared-config { inherit config pkgs; })
         (
@@ -162,4 +141,69 @@ in
         )
       ];
     };
+
+  flake.nixosModules.ntfy-client-sops =
+    { config, ... }:
+    {
+      options.my.notifications.ntfy = with lib; {
+        sops = mkEnableOption "ntfy password management with sops";
+      };
+
+      config = lib.mkIf config.my.notifications.ntfy.enable {
+        sops.secrets."ntfy/auth" = { };
+        my.notifications.ntfy.authentication-file = config.sops.secrets."ntfy/auth".path;
+      };
+    };
+
+  flake.nixosModules.ntfy-server =
+    { config, ... }:
+    {
+      options.my.ntfy = with lib; {
+        enable = mkEnableOption "ntfy server";
+        base-url = mkOption {
+          type = types.str;
+          description = options.services.settings.base-url;
+        };
+        environmentFiles = mkOption {
+          type = types.listOf types.path;
+          description = "environment files for the systemd service, useful for managing secrets";
+          default = [ ];
+        };
+        openFirewall = mkEnableOption "ntfy server ports through firewall";
+      };
+
+      config =
+        let
+          cfg = config.my.ntfy;
+        in
+        lib.mkIf cfg.enable {
+          services.ntfy-sh = {
+            enable = true;
+            settings = {
+              base-url = cfg.base-url;
+              listen-http = ":2586";
+            };
+          };
+
+          networking.firewall.allowedTCPPorts = lib.optionals cfg.openFirewall [ 2586 ];
+
+          systemd.services.ntfy-sh.serviceConfig = {
+            EnvironmentFile = cfg.environmentFiles;
+          };
+        };
+    };
+
+  flake.nixosModules.ntfy-server-sops =
+    { config, ... }:
+    {
+      options.my.ntfy.sops = with lib; {
+        enable = mkEnableOption "ntfy password management with sops";
+      };
+
+      config = lib.mkIf config.my.ntfy.sops.enable {
+        sops.secrets."ntfy/environment" = { };
+        my.ntfy.environmentFiles = [ config.sops.secrets."ntfy/environment".path ];
+      };
+    };
+
 }
