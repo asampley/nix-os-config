@@ -70,9 +70,7 @@ let
       };
 
       config = lib.mkIf config.my.notifications.ntfy.enable {
-        sops.secrets."ntfy/auth" = {
-          restartUnits = [ "ntfy-sh.service" ];
-        };
+        sops.secrets."ntfy/auth" = { };
         my.notifications.ntfy.authentication-file = config.sops.secrets."ntfy/auth".path;
       };
     };
@@ -211,7 +209,9 @@ in
       };
 
       config = lib.mkIf config.my.ntfy.sops.enable {
-        sops.secrets."ntfy/environment" = { };
+        sops.secrets."ntfy/environment" = {
+          restartUnits = [ "ntfy-sh.service" ];
+        };
         my.ntfy.environmentFiles = [ config.sops.secrets."ntfy/environment".path ];
       };
     };
