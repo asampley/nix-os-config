@@ -189,6 +189,7 @@ in
                 "publish:*:wo"
                 "asampley:*:ro"
               ];
+              behind-proxy = true;
             };
           };
 

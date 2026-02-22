@@ -89,18 +89,45 @@
               };
             };
 
-            services.nginx.virtualHosts."tracker.asampley.ca" = {
-              onlySSL = true;
-              enableACME = true;
-              locations."/" = {
-                proxyPass = "http://localhost:6969/announce";
-                recommendedProxySettings = true;
+            services.nginx.virtualHosts = {
+              "tracker.asampley.ca" = {
+                forceSSL = true;
+                enableACME = true;
+                locations."/" = {
+                  proxyPass = "http://localhost:6969/announce";
+                  recommendedProxySettings = true;
+                };
+              };
+
+              "ntfy.asampley.ca" = {
+                forceSSL = true;
+                enableACME = true;
+                locations."/" = {
+                  proxyPass = "http://localhost:2586";
+                  recommendedProxySettings = true;
+                  extraConfig = ''
+                    proxy_http_version 1.1;
+
+                    proxy_set_header Upgrade $http_upgrade;
+                    proxy_set_header Connection "upgrade";
+
+                    proxy_buffering off;
+                    proxy_request_buffering off;
+                    proxy_redirect off;
+
+                    proxy_connect_timeout 3m;
+                    proxy_send_timeout 3m;
+                    proxy_read_timeout 3m;
+
+                    client_max_body_size 0;
+                  '';
+                };
               };
             };
 
             services.rsnapshot.extraConfig = ''
               # Valheim server
-              #backup /home/steam/.config/unity3d/IronGate/Valheim/worlds_local/	localhost/	exclude=*_backup_*,exclude=*.old
+              #backup /home/steam/.config/unity3d/IronGate/Valheim/worlds_local/        localhost/        exclude=*_backup_*,exclude=*.old
             '';
 
             environment.etc."utf-nate/1/config.toml".text = ''
