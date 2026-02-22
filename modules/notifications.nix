@@ -46,13 +46,13 @@ let
     let
       cfg = config.my.notifications;
       ntfy-command = prefix: status: ''
-                  ${pkgs.curl}/bin/curl '${cfg.ntfy.address}/system' -d '${prefix} ${config.networking.hostName}'": $1 service ${status}." ${
-                    if (cfg.ntfy.authentication-file != null) then
-                      ''-u "$(cat "${cfg.ntfy.authentication-file}")"''
-                    else
-                      ""
-                  }
-        	'';
+        ${pkgs.curl}/bin/curl '${cfg.ntfy.address}/system' -d '${prefix} ${config.networking.hostName}'": $1 service ${status}." ${
+          if (cfg.ntfy.authentication-file != null) then
+            ''-u "$(cat "${cfg.ntfy.authentication-file}")"''
+          else
+            ""
+        }
+      '';
     in
     {
       my.notifications = lib.mkMerge [
@@ -150,7 +150,9 @@ in
       };
 
       config = lib.mkIf config.my.notifications.ntfy.enable {
-        sops.secrets."ntfy/auth" = { };
+        sops.secrets."ntfy/auth" = {
+          restartUnits = [ "ntfy-sh.service" ];
+        };
         my.notifications.ntfy.authentication-file = config.sops.secrets."ntfy/auth".path;
       };
     };
@@ -182,6 +184,11 @@ in
             settings = {
               base-url = cfg.base-url;
               listen-http = ":2586";
+              auth-default-access = "deny-all";
+              auth-access = [
+                "publish:*:wo"
+                "asampley:*:ro"
+              ];
             };
           };
 
