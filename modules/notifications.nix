@@ -46,7 +46,7 @@ let
       cfg = config.my.notifications;
     in
     ''
-      ${pkgs.curl}/bin/curl '${cfg.ntfy.address}/system' -d '${prefix} '"''$(${pkgs.coreutils}/bin/uname -n): $1 service ${status}." ${
+      ${pkgs.curl}/bin/curl '${cfg.ntfy.address}/${topic}' -d '${prefix} '"''$(${pkgs.coreutils}/bin/uname -n): $1 service ${status}." ${
         if (cfg.ntfy.authentication-file != null) then
           ''-u "$(cat "${cfg.ntfy.authentication-file}")"''
         else
