@@ -62,6 +62,20 @@ let
         })
       ];
     };
+  ntfy-client-sops =
+    { config, ... }:
+    {
+      options.my.notifications.ntfy = with lib; {
+        sops = mkEnableOption "ntfy password management with sops";
+      };
+
+      config = lib.mkIf config.my.notifications.ntfy.enable {
+        sops.secrets."ntfy/auth" = {
+          restartUnits = [ "ntfy-sh.service" ];
+        };
+        my.notifications.ntfy.authentication-file = config.sops.secrets."ntfy/auth".path;
+      };
+    };
 in
 {
   perSystem =
@@ -142,20 +156,8 @@ in
       ];
     };
 
-  flake.nixosModules.ntfy-client-sops =
-    { config, ... }:
-    {
-      options.my.notifications.ntfy = with lib; {
-        sops = mkEnableOption "ntfy password management with sops";
-      };
-
-      config = lib.mkIf config.my.notifications.ntfy.enable {
-        sops.secrets."ntfy/auth" = {
-          restartUnits = [ "ntfy-sh.service" ];
-        };
-        my.notifications.ntfy.authentication-file = config.sops.secrets."ntfy/auth".path;
-      };
-    };
+  flake.nixosModules.ntfy-client-sops = ntfy-client-sops;
+  flake.homeModules.ntfy-client-sops = ntfy-client-sops;
 
   flake.nixosModules.ntfy-server =
     { config, ... }:
