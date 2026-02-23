@@ -183,7 +183,8 @@ in
               auth-default-access = "deny-all";
               auth-access = [
                 "publish:*:wo"
-                "asampley:*:ro"
+                "asampley:system:ro"
+                "asampley:*:rw"
               ];
               behind-proxy = true;
             };
