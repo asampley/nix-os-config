@@ -15,6 +15,8 @@
             # Custom modules
             my.auto-certs.enable = true;
 
+            my.backup.borg.notifications.enable = true;
+
             my.bittorrent.opentracker = {
               enable = true;
               supportReverseProxy = true;

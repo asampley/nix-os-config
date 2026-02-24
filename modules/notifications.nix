@@ -41,7 +41,9 @@ let
         };
       };
     };
-  ntfy-command = { config, pkgs, ... }: topic: prefix: status: 
+  ntfy-command =
+    { config, pkgs, ... }:
+    topic: prefix: status:
     let
       cfg = config.my.notifications;
     in
@@ -90,10 +92,11 @@ in
     { config, pkgs, ... }:
     {
       options = shared-options;
-      config = 
+      config =
         let
           cfg = config.my.notifications;
-        in lib.mkMerge [
+        in
+        lib.mkMerge [
           (lib.mkIf cfg.libnotify.enable {
             my.notifications.on-failure.script = ''${self'.packages.notify-send-all}/bin/notify-send-all "$1 service failed." --urgency critical;'';
             my.notifications.on-success.script = ''${self'.packages.notify-send-all}/bin/notify-send-all "$1 service succeeded.";'';
