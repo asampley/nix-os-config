@@ -27,6 +27,11 @@ let
         };
         ntfy = {
           enable = mkEnableOption "send curl requests to ntfy.sh service";
+          topic = mkOption {
+            type = str;
+            description = "topic to publish on";
+            example = "system";
+          };
           address = mkOption {
             type = str;
             description = "address to send requests to";
@@ -50,14 +55,23 @@ let
         };
       };
     };
-  ntfy-command =
+  shared-config =
     { config, pkgs, ... }:
-    topic: prefix: status:
+    let
+      cfg = config.my.notifications;
+    in
+    lib.mkIf cfg.ntfy.enable {
+      my.notifications.on-failure.script = ntfy-command "🔴" "failed" { inherit config pkgs; };
+      my.notifications.on-success.script = ntfy-command "🟢" "succeeded" { inherit config pkgs; };
+    };
+  ntfy-command =
+    prefix: status:
+    { config, pkgs, ... }:
     let
       cfg = config.my.notifications;
     in
     ''
-      ${pkgs.curl}/bin/curl '${cfg.ntfy.address}/${topic}' -d '${prefix} '"''$(${pkgs.coreutils}/bin/uname -n): $1 service ${status}." ${
+      ${pkgs.curl}/bin/curl '${cfg.ntfy.address}/${cfg.ntfy.topic}' -d '${prefix} '"''$(${pkgs.coreutils}/bin/uname -n): $1 service ${status}." ${
         if (cfg.ntfy.authentication != null) then
           with cfg.ntfy.authentication; ''-u "${user}:$(cat "${password-file}")"''
         else
@@ -106,16 +120,15 @@ in
           cfg = config.my.notifications;
         in
         lib.mkMerge [
+          (shared-config { inherit config pkgs; })
           (lib.mkIf cfg.libnotify.enable {
             my.notifications.on-failure.script = ''${self'.packages.notify-send-all}/bin/notify-send-all "$1 service failed." --urgency critical;'';
             my.notifications.on-success.script = ''${self'.packages.notify-send-all}/bin/notify-send-all "$1 service succeeded.";'';
           })
-          (lib.mkIf cfg.ntfy.enable {
-            my.notifications.on-failure.script = ntfy-command { inherit config pkgs; } "system" "🔴" "failed";
-            my.notifications.on-success.script = ntfy-command { inherit config pkgs; } "system" "🟢" "succeeded";
-            my.notifications.ntfy.authentication.user = lib.mkDefault "publish";
-          })
           {
+            my.notifications.ntfy.topic = lib.mkDefault "system";
+            my.notifications.ntfy.authentication.user = lib.mkDefault "publish";
+
             systemd.services = lib.mkIf cfg.enable {
               "notify-on-failure@" = {
                 unitConfig.Description = "runs a script notifying %i has failed";
@@ -140,16 +153,14 @@ in
           cfg = config.my.notifications;
         in
         lib.mkMerge [
+          (shared-config { inherit config pkgs; })
           (lib.mkIf cfg.libnotify.enable {
             my.notifications.on-failure.script = lib.mkIf cfg.libnotify.enable ''${pkgs.libnotify}/bin/notify-send "$1 service failed." --urgency critical;'';
             my.notifications.on-success.script = lib.mkIf cfg.libnotify.enable ''${pkgs.libnotify}/bin/notify-send "$1 service succeeded.";'';
           })
-          (lib.mkIf cfg.ntfy.enable {
-            my.notifications.on-failure.script = ntfy-command { inherit config pkgs; } "home" "🔴" "failed";
-            my.notifications.on-success.script = ntfy-command { inherit config pkgs; } "home" "🟢" "succeeded";
-            my.notifications.ntfy.authentication.user = lib.mkDefault "${config.home.username}";
-          })
           {
+            my.notifications.ntfy.topic = "home";
+            my.notifications.ntfy.authentication.user = lib.mkDefault "${config.home.username}";
 
             systemd.user.services = lib.mkIf cfg.enable {
               "notify-on-failure@" = {
