@@ -32,12 +32,21 @@ let
             description = "address to send requests to";
             example = "willheim.local";
           };
-          authentication-file = mkOption {
-            type = nullOr str;
-            description = "path containing authentication string for curl with ntfy";
-            default = null;
+          authentication = mkOption {
+            type = nullOr (submodule {
+              options = {
+                user = mkOption {
+                  type = str;
+                  description = "user for authentication with ntfy";
+                };
+                password-file = mkOption {
+                  type = str;
+                  description = "path containing authentication password for ntfy";
+                  default = null;
+                };
+              };
+            });
           };
-
         };
       };
     };
@@ -49,8 +58,8 @@ let
     in
     ''
       ${pkgs.curl}/bin/curl '${cfg.ntfy.address}/${topic}' -d '${prefix} '"''$(${pkgs.coreutils}/bin/uname -n): $1 service ${status}." ${
-        if (cfg.ntfy.authentication-file != null) then
-          ''-u "$(cat "${cfg.ntfy.authentication-file}")"''
+        if (cfg.ntfy.authentication != null) then
+          with cfg.ntfy.authentication; ''-u "${user}:$(cat "${password-file}")"''
         else
           ""
       }
@@ -63,8 +72,8 @@ let
       };
 
       config = lib.mkIf config.my.notifications.ntfy.enable {
-        sops.secrets."ntfy/auth" = { };
-        my.notifications.ntfy.authentication-file = config.sops.secrets."ntfy/auth".path;
+        sops.secrets."ntfy/password" = { };
+        my.notifications.ntfy.authentication.password-file = config.sops.secrets."ntfy/password".path;
       };
     };
 in
@@ -104,6 +113,7 @@ in
           (lib.mkIf cfg.ntfy.enable {
             my.notifications.on-failure.script = ntfy-command { inherit config pkgs; } "system" "🔴" "failed";
             my.notifications.on-success.script = ntfy-command { inherit config pkgs; } "system" "🟢" "succeeded";
+            my.notifications.ntfy.authentication.user = lib.mkDefault "publish";
           })
           {
             systemd.services = lib.mkIf cfg.enable {
@@ -137,8 +147,10 @@ in
           (lib.mkIf cfg.ntfy.enable {
             my.notifications.on-failure.script = ntfy-command { inherit config pkgs; } "home" "🔴" "failed";
             my.notifications.on-success.script = ntfy-command { inherit config pkgs; } "home" "🟢" "succeeded";
+            my.notifications.ntfy.authentication.user = lib.mkDefault "${config.home.username}";
           })
           {
+
             systemd.user.services = lib.mkIf cfg.enable {
               "notify-on-failure@" = {
                 Unit.Description = "runs a script notifying %i has failed";

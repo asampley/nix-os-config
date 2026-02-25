@@ -41,6 +41,19 @@
               sops.enable = true;
             };
 
+            my.monitoring = {
+              prometheus = {
+                enable = true;
+                openFirewall = true;
+                ntfy = {
+                  enable = true;
+                  baseurl = config.my.notifications.ntfy.address;
+                  #baseurl = "http://localhost:2586";
+                };
+              };
+              prometheus-node.enable = true;
+            };
+
             my.notifications = {
               enable = true;
               ntfy = {
