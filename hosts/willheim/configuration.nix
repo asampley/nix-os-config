@@ -73,6 +73,12 @@
             my.sops.enable = true;
             my.utf-nate.enable = true;
 
+            my.xmpp.prosody = {
+              enable = true;
+              publicDomainName = "asampley.ca";
+              openFirewall = true;
+            };
+
             # Use the systemd-boot EFI boot loader.
             boot.loader.systemd-boot.enable = true;
             boot.loader.efi.canTouchEfiVariables = true;

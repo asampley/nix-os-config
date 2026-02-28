@@ -55,14 +55,16 @@
               };
               modules = {
                 admin_adhoc = lib.mkDefault false;
+                bosh = lib.mkDefault true;
                 cloud_notify = lib.mkDefault false;
-                blocklist = lib.mkDefault false;
-                bookmarks = lib.mkDefault false;
+                blocklist = lib.mkDefault true;
+                bookmarks = lib.mkDefault true;
                 dialback = lib.mkDefault false;
                 ping = lib.mkDefault false;
                 private = lib.mkDefault false;
                 register = lib.mkDefault false;
-                vcard_legacy = lib.mkDefault false;
+                vcard_legacy = lib.mkDefault true;
+                websocket = lib.mkDefault true;
               };
               muc = [
                 {
@@ -79,14 +81,14 @@
                   url = "upload.${cfg.prosody.domainName}";
                 }
               ];
-              xmppComplianceSuite = lib.mkDefault false;
+              xmppComplianceSuite = lib.mkDefault true;
             };
 
             # certs for xmpp
             security.acme.certs."${cfg.prosody.publicDomainName}" = {
               extraDomainNames = [
-                "${cfg.prosody.domainName}"
-                "*.${cfg.prosody.domainName}"
+                "upload.${cfg.prosody.domainName}"
+                "conference.${cfg.prosody.domainName}"
               ];
               postRun = ''
                 ${pkgs.acl}/bin/setfacl -m u:prosody:rx "${
@@ -97,6 +99,14 @@
                 }"/*.pem
               '';
               reloadServices = [ "prosody" ];
+            };
+
+            services.nginx.virtualHosts."${cfg.prosody.publicDomainName}" = {
+              serverAliases = [
+                "conference.${cfg.prosody.domainName}"
+                "upload.${cfg.prosody.domainName}"
+              ];
+              enableACME = true;
             };
           })
         ];
